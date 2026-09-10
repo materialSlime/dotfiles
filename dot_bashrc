@@ -1,0 +1,43 @@
+#
+# ~/.bashrc
+#
+
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
+
+# Initialize zoxide
+eval "$(zoxide init bash)"
+alias cd='z'
+
+# eza aliases for listing
+alias ls='eza --icons -a --group-directories-first'
+alias ll="ls -hl --git"
+alias lt="ll --tree"
+alias ltc='eza --tree --level=3 --icons --ignore-glob="node_modules|.git|pycache|.DS_Store|.cache"'
+
+export SUDO_EDITOR=/usr/bin/nvim
+alias grep='grep --color=auto'
+PS1='[\u@\h \W]\$ '
+
+# Hermes completion
+export PATH="$HOME/.local/bin:$PATH"
+eval "$(hermes completion bash)"
+
+# Starship initiator
+eval -- "$(/usr/bin/starship init bash --print-full-init)"
+
+# Yazi: changes directory on exit, it's a shell wrapper
+function y() {
+  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+  command yazi "$@" --cwd-file="$tmp"
+  IFS= read -r -d '' cwd <"$tmp"
+  [ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd"
+  command rm -f -- "$tmp"
+}
+
+# libvirt: use system daemon so unprivileged virsh sees VMs/networks
+export LIBVIRT_DEFAULT_URI="qemu:///system"
+
+
+# Added by Antigravity CLI installer
+export PATH="/home/neo/.local/bin:$PATH"

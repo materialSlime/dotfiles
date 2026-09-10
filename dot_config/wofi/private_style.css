@@ -1,0 +1,46 @@
+window {
+    margin: 0px;
+    border: 2px solid rgb(247,80,72);
+    background-color: rgb(14,14,24);
+    border-radius: 0px;
+    font-family: "Rajdhani", sans-serif;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+#input {
+    margin: 10px;
+    border: none;
+    border-radius: 0px;
+    background-color: #313244;
+    color: #cdd6f4;
+    padding: 8px;
+}
+
+#inner-box {
+    margin: 5px;
+    background-color: transparent;
+}
+
+#outer-box {
+    margin: 5px;
+    background-color: transparent;
+}
+
+#entry {
+    padding: 8px;
+    border-radius: 0px;
+    color: rgb(247,80,72);
+}
+
+#entry:selected {
+    border-left: 10px solid rgb(241,181,55);
+    background-color: rgb(10,15,39);
+    color: rgb(241,181,55);
+    text-shadow: 0 0 10px rgb(241,181,55);
+}
+
+#text {
+    margin-left: 10px;
+    text-shadow: 0 0 10px rgb(247,80,72);
+}

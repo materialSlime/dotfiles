@@ -1,0 +1,16 @@
+width=400
+height=500
+location=center
+show=drun
+prompt=Search Apps...
+filter_rate=100
+allow_images=true
+image_size=32
+always_parse_args=true
+show_all=false
+print_command=true
+dynamic_height=true
+layer=overlay
+insensitive=true
+hide_scroll=true
+no_actions=true

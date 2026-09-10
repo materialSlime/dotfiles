@@ -1,0 +1,206 @@
+/* --- 1. Color Palette --- */
+/* These are the main colors for the theme. You can change them here. */
+@define-color cyber-background #0e0f18; /* Very dark grey, almost black */
+@define-color cyber-foreground #28F2F4; /* Bright neon cyan/aqua */
+@define-color cyber-yellow     #ECEB1E; /* Bright neon yellow */
+@define-color cyber-magenta    #246DCE; /* Bright neon magenta */
+@define-color cyber-red        #C7373E; /* Bright neon red for alerts */
+@define-color cyber-border-color #00ffea; /* Border color, matches the foreground */
+
+/* --- 2. General Bar & Font Styles --- */
+/* This section applies the new look to the entire Waybar. */
+window#waybar {
+  /* background-image: radial-gradient(ellipse, #060d1a, #350811); */
+  background-color: @cyber-background;
+  color: @cyber-foreground;
+  /* border-bottom: 2px solid @cyber-red; */
+}
+
+/* This applies a glowing text effect and the new font to all modules. */
+* {
+  font-weight: 600;
+  font-family: "Rajdhani", "JetBrainsMono Nerd Font Mono";
+}
+
+/* --- 3. Generic Module Styling --- */
+/* This gives all modules a consistent "cybernetic panel" look. */
+#workspaces,
+#clock,
+#custom-clock,
+#battery,
+#cpu,
+#network,
+#pulseaudio,
+#tray,
+#bluetooth,
+#custom-media,
+#custom-caffeine {
+  background-color: transparent;
+  padding: 0 10px;
+  margin: 0 5px;
+  border-radius: 2px;
+}
+
+/* Caffeine Toggle */
+#custom-caffeine {
+  font-size: 1.3em;
+  padding: 0 6px;
+}
+
+#custom-caffeine.on {
+  color: @cyber-yellow;
+  text-shadow: 0 0 8px @cyber-yellow;
+}
+
+#custom-caffeine.off {
+  color: @cyber-foreground;
+  opacity: 0.6;
+}
+
+/* --- Tooltip --- */
+tooltip {
+  border: 20px solid transparent;
+  border-image-source: url("./assets/blade.svg");
+  border-image-slice: 45 93 84 79 fill;
+  background-color: @cyber-background;
+}
+
+tooltip label {
+  padding: 5px;
+  padding-left: 10px;
+  color: @cyber-foreground;
+  text-shadow: 0 0 10px alpha(@cyber-foreground, 0.5);
+}
+
+/* --- 4. Specific Module Styling --- */
+/* This section gives modules unique styles, following the order in config.jsonc. */
+
+/* --- Left Modules --- */
+
+/* --- Power Menu --- */
+#custom-powermenu {
+  font-size: 20px;
+  color: @cyber-yellow;
+  text-shadow: 0 0 5px @cyber-yellow;
+  padding: 0 10px;
+  background-image: url("./assets/idk.svg");
+  background-size: 100% 85%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+#custom-powermenu:hover {
+  color: @cyber-red;
+  text-shadow: 0 0 5px @cyber-yellow;
+}
+/* Custom Clock */
+#custom-clock {
+  color: @cyber-yellow;
+  text-shadow: 0 0 5px @cyber-yellow;
+  padding: 0 5px;
+}
+
+/* Media Player */
+#custom-media {
+  color: @cyber-foreground;
+  text-shadow: 0 0 5px @cyber-foreground;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- Center Modules --- */
+
+#workspaces button {
+  color: @cyber-red;
+  text-shadow: 2px 2px 6px @cyber-red;
+  transition: all 0.3s ease-in-out;
+  padding: 0px 20px;
+}
+
+#workspaces button.active {
+  color: @cyber-foreground;
+  text-shadow: 0 0 10px @cyber-foreground;
+  border-bottom: 2px solid @cyber-foreground;
+  border-radius: 2px;
+}
+
+/* --- Right Modules --- */
+
+/* Tray Group */
+#custom-expand-icon {
+  color: @cyber-red;
+  font-size: 1.8em;
+  padding: 0px 8px;
+  text-shadow: 0 0 5px @cyber-red;
+}
+
+#bluetooth,
+#network,
+#pulseaudio {
+  font-size: 1.5em;
+  margin: 0 5px;
+  padding: 0 4px;
+}
+
+#network.disconnected {
+  color: @cyber-red;
+  border-color: @cyber-red;
+  text-shadow: 0 0 5px @cyber-red;
+  box-shadow: 0 0 5px @cyber-red;
+}
+
+#pulseaudio.muted {
+  color: @cyber-red;
+  border-color: @cyber-red;
+  text-shadow: 0 0 5px @cyber-red;
+  box-shadow: 0 0 5px @cyber-red;
+}
+
+/* CPU */
+#cpu {
+  color: @cyber-foreground;
+  text-shadow: 0 0 5px @cyber-magenta;
+  margin-left: 5px;
+  margin-right: 1px;
+  padding: 0 14px;
+  margin-top: 0;
+  margin-bottom: 0;
+  background-image: url("./assets/long-panel.svg");
+  background-size: 100% 85%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+#cpu.warning {
+  color: @cyber-yellow;
+  text-shadow: 0 0 5px @cyber-yellow;
+}
+
+#cpu.critical {
+  color: @cyber-red;
+  text-shadow: 0 0 5px @cyber-red;
+}
+
+/* Memory */
+
+#memory {
+  color: @cyber-foreground;
+  text-shadow: 0 0 5px @cyber-magenta;
+  margin-left: 2px;
+  margin-right: 2px;
+  padding: 0 8px;
+  background-image: url("./assets/long-panel-v2.svg");
+  background-size: 100% 85%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+#memory.warning {
+  color: @cyber-yellow;
+  text-shadow: 0 0 5px @cyber-yellow;
+}
+
+#memory.critical {
+  color: @cyber-red;
+  text-shadow: 0 0 5px @cyber-red;
+}

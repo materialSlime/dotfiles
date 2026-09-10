@@ -1,0 +1,152 @@
+{
+  "reload_style_on_change": true,
+  "layer": "top",
+  "position": "top",
+  "spacing": 0,
+  "height": 35,
+  "modules-left": [
+    "custom/powermenu",
+    "custom/clock",
+    "custom/media"
+  ],
+  "modules-center": ["hyprland/workspaces"],
+  "modules-right": [
+    "group/tray-expander",
+    "bluetooth",
+    "network",
+    "pulseaudio",
+    "custom/caffeine",
+    "cpu",
+    "memory",
+    "battery",
+  ], 
+  "custom/powermenu": {
+    "format": "⏻",
+    "on-click": "/home/neo/.config/wofi/power-menu.sh",
+    "tooltip": false
+  },
+  "custom/clock": {
+    "exec": "~/.config/waybar/scripts/clock-manager.sh get_display",
+    "on-click": "~/.config/waybar/scripts/clock-manager.sh toggle",
+    "interval": 30,
+    "signal": 10,
+    "return-type": "json",
+    "format": "{}"
+  },
+  "custom/caffeine": {
+    "exec": "~/.config/waybar/scripts/caffeine.sh",
+    "on-click": "~/.config/waybar/scripts/caffeine.sh toggle",
+    "return-type": "json",
+    "interval": 5,
+    "signal": 9,
+    "tooltip": true
+  },
+  "custom/media": {
+    "return-type": "json",
+    "escape": true,
+    "max-length": 30,
+    "on-click": "playerctl play-pause",
+    "on-click-right": "playerctl stop",
+    "smooth-scrolling-threshold": 1,
+    "on-scroll-up": "playerctl next",
+    "on-scroll-down": "playerctl previous",
+    "exec": "~/.config/waybar/scripts/mediaplayer.sh",
+    "interval": 3
+  },
+  "hyprland/workspaces": {
+    "on-click": "activate",
+    "format": "{icon}",
+    "format-icons": {
+      "default": "",
+      "1": "<span font_desc='Noto Sans Japanese Bold 14'>一</span>",
+      "2": "<span font_desc='Noto Sans Japanese Bold 14'>二</span>",
+      "3": "<span font_desc='Noto Sans Japanese Bold 14'>三</span>",
+      "4": "<span font_desc='Noto Sans Japanese Bold 14'>四</span>",
+      "5": "<span font_desc='Noto Sans Japanese Bold 14'>五</span>",
+      "6": "<span font_desc='Noto Sans Japanese Bold 14'>六</span>",
+      "7": "<span font_desc='Noto Sans Japanese Bold 14'>七</span>",
+      "8": "<span font_desc='Noto Sans Japanese Bold 14'>八</span>",
+      "9": "<span font_desc='Noto Sans Japanese Bold 14'>九</span>",
+      "10": "<span font_desc='Noto Sans Japanese Bold 14'>十</span>",
+      "active": "<span font_desc='Noto Sans Japanese Bold 14'></span>"
+    },
+    "persistent-workspaces": {
+      "1": [],
+      "2": [],
+      "3": [],
+      "4": [],
+      "5": []
+    }
+  },
+  "group/tray-expander": {
+    "orientation": "inherit",
+    "drawer": {
+      "transition-duration": 300,
+      "children-class": "tray-group-item"
+    },
+    "modules": ["custom/expand-icon", "tray"]
+  },
+  "custom/expand-icon": {
+    "format": "+",
+    "tooltip": false
+  },
+  "tray": {
+    "icon-size": 16,
+    "spacing": 17
+  },
+  "bluetooth": {
+    "format": "",
+    "format-disabled": "󰂲",
+    "format-connected": "<span font_desc='Rajdhani Bold 12'>󰂱  {device_battery_percentage}%</span>",
+    "format-no-controller": "",
+    "tooltip-format-connected": "{controller_alias}\n{controller_address}\nConnected: {num_connections}\n\n{device_enumerate}",
+    "tooltip-format-enumerate-connected": "{device_alias} ({device_battery_percentage}%)",
+    "tooltip-format-enumerate-connected-battery": "{device_alias} ({device_battery_percentage}%)",
+    "tooltip-format-enumerate-disconnected": "{device_alias}\t{device_address}",
+    "on-click": "exec uwsm app -- xdg-terminal-exec --title=floating-tui bluetui"
+  },
+  "network": {
+    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+    "format": "{icon}",
+    "format-wifi": "{icon}",
+    "format-ethernet": "󰀂",
+    "format-disconnected": "󰤮",
+    "tooltip-format-wifi": "{ifname}\n{essid}\nIP: {ipaddr}/{cidr}\n{frequency} MHz | {signalStrength}%\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+    "tooltip-format-ethernet": "{ifname}\nIP: {ipaddr}/{cidr}\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
+    "tooltip-format-disconnected": "Disconnected",
+    "interval": 3,
+    "spacing": 1,
+    "on-click": "exec uwsm app -- xdg-terminal-exec --title=floating-tui nmtui",
+    "on-click-right": "exec uwsm app -- xdg-terminal-exec --title=floating-tui impala"
+  },
+  "pulseaudio": {
+    "format": "{icon}",
+    "on-click": "exec uwsm app -- xdg-terminal-exec --title=floating-tui wiremix",
+    "on-click-right": "pamixer -t",
+    "tooltip-format": "Playing at {volume}%",
+    "scroll-step": 5,
+    "format-muted": "",
+    "format-icons": {
+      "default": ["", "", ""]
+    }
+  },
+  "cpu": {
+    "interval": 5,
+    "format": "<span font_desc='JetBrains Mono Bold 16' >󰍛</span>",
+    "tooltip-format": "{usage}%",
+    "on-click": "exec uwsm app -- xdg-terminal-exec --title=floating-tui btop -p 2",
+    "states": {
+      "warning": 50,
+      "critical": 90
+    }
+  },
+  "memory": {
+    "interval": 5,
+    "format": "<span font_desc='Rajdhani Bold 12' >{used:0.1f}G</span>",
+    "on-click": "exec uwsm app -- xdg-terminal-exec --title=floating-tui btop -p 1",
+    "states": {
+      "warning": 80,
+      "critical": 95
+    }
+  }
+}

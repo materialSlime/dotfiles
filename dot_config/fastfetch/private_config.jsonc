@@ -1,0 +1,137 @@
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/schema.json",
+    "logo": {
+        "type": "file",
+        "source": "/home/neo/.config/fastfetch/logo.txt",
+        "color": {
+            "1": "red",
+            "2": "cyan"
+        },
+        "padding": {
+            "top": 2,
+            "left": 1,
+            "right": 4
+        }
+    },
+    "display": {
+        "separator": " :// ",
+        "color": {
+            "keys": "red"
+        },
+        "bar": {
+          "width": 10,       // Width of percentage bars
+          "char": {
+              "elapsed": "■", // Character for elapsed portion
+              "total": "-",    // Character for total portion
+          },
+        },
+        "percent": {
+          "type": 9,         // 1=number, 2=bar, 3=both, 9=colored number
+          "color": {
+              "green": "green",
+              "yellow": "light_yellow",
+              "red": "light_red"
+          }
+        }
+    },
+    "modules": [
+        "break",
+        {
+            "type": "custom",
+            "format": "┌──────────────────────────────────────────────────┐"
+        },
+        {
+            "type": "title",
+            "format": "  󰈼 SYSTEM DASHBOARD // ONLINE"
+        },
+        {
+            "type": "custom",
+            "format": "└──────────────────────────────────────────────────┘"
+        },
+        "break",
+        {
+            "type": "os",
+            "key": " 󰍛 OS",
+            "keyColor": "cyan"
+        },
+        {
+            "type": "kernel",
+            "key": " 󰒅 KRNL",
+            "keyColor": "cyan"
+        },
+        {
+            "type": "packages",
+            "key": " 󰏖 PKGS",
+            "keyColor": "cyan"
+        },
+        {
+            "type": "wm",
+            "key": " 󱂬 WM",
+            "keyColor": "cyan"
+        },
+        {
+            "type": "session",
+            "key": " 󰖳 SESS",
+            "keyColor": "cyan"
+        },
+        {
+            "type": "uptime",
+            "key": " 󰅐 UPTIME",
+            "keyColor": "cyan"
+        },
+        "break",
+        {
+            "type": "custom",
+            "format": " ──────────────────────────────────────────────────"
+        },
+        {
+            "type": "cpu",
+            "key": " 󰻠 CPU",
+            "keyColor": "red"
+        },
+        {
+            "type": "gpu",
+            "key": " 󰢮 GPU",
+            "keyColor": "red"
+        },
+        {
+            "type": "memory",
+            "key": " 󰘚 RAM",
+            "keyColor": "red",
+            "percent": {
+              "type": 3,
+              "yellow": 30,
+              "red": 70
+            }
+        },
+        "break",
+        {
+            "type": "custom",
+            "format": " ──────────────────────────────────────────────────"
+        },
+        {
+            "type": "disk",
+            "key": " 󰋊 DISK",
+            "keyColor": "cyan",
+            "percent": {
+              "type": 3,
+              "yellow": 30,
+              "red": 70
+            }
+        },
+        {
+            "type": "localip",
+            "key": " 󰾆 NET",
+            "keyColor": "cyan"
+        },
+        "break",
+        {
+            "type": "custom",
+            "format": " ──────────────────────────────────────────────────"
+        },
+        {
+            "type": "colors",
+            "symbol": "circle"
+        }
+    ]
+}
