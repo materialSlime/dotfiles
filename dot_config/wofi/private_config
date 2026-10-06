@@ -14,3 +14,4 @@ layer=overlay
 insensitive=true
 hide_scroll=true
 no_actions=true
+term=xdg-terminal-exec

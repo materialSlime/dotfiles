@@ -10,6 +10,8 @@ Outputs (all in ~/.config/theme/gen/ unless noted):
   btop.theme     btop theme            -> btop/btop.conf (color_theme = ...)
   sddm.conf      SDDM theme.conf.user  -> install with: build --sddm (needs sudo)
                  (one-time: SDDM's Main.qml must be the palette-aware copy in ~/.config/theme/sddm/)
+  gtk3.css       adw-gtk3 colors       -> gtk-3.0/gtk.css (@import; needs adw-gtk3-dark theme)
+  gtk4.css       libadwaita colors     -> gtk-4.0/gtk.css (@import)
   starship.toml  palette block rewritten in place between the theme-build markers
 
 Usage: build            generate + reload
@@ -151,6 +153,40 @@ def gen_sddm(p):
     return "\n".join(lines) + "\n"
 
 
+def gtk_roles(p):
+    """libadwaita / adw-gtk3 named colors, mapped onto palette roles."""
+    return {
+        "accent_bg_color": p["accent"],    "accent_fg_color": p["bg"],    "accent_color": p["accent"],
+        "destructive_bg_color": p["primary"], "destructive_fg_color": p["bg"], "destructive_color": p["primary"],
+        "success_bg_color": p["secondary"], "success_fg_color": p["bg"],  "success_color": p["secondary"],
+        "warning_bg_color": p["accent"],   "warning_fg_color": p["bg"],   "warning_color": p["accent"],
+        "error_bg_color": p["primary"],    "error_fg_color": p["bg"],     "error_color": p["primary"],
+        "window_bg_color": p["bg"],        "window_fg_color": p["text"],
+        "view_bg_color": p["bg_dark"],     "view_fg_color": p["text"],
+        "headerbar_bg_color": p["bg_dark"], "headerbar_fg_color": p["text"],
+        "headerbar_border_color": p["primary"], "headerbar_backdrop_color": p["bg"],
+        "sidebar_bg_color": p["surface"],  "sidebar_fg_color": p["text"],
+        "sidebar_backdrop_color": p["surface"], "sidebar_border_color": p["bg_dark"],
+        "card_bg_color": p["surface"],     "card_fg_color": p["text"],
+        "dialog_bg_color": p["bg"],        "dialog_fg_color": p["text"],
+        "popover_bg_color": p["surface"],  "popover_fg_color": p["text"],
+        "thumbnail_bg_color": p["surface"], "thumbnail_fg_color": p["text"],
+    }
+
+
+def gen_gtk3(p):
+    lines = [f"/* {HEADER} */", "/* adw-gtk3 named colors, imported by ~/.config/gtk-3.0/gtk.css */"]
+    lines += [f"@define-color {k} {v};" for k, v in gtk_roles(p).items()]
+    return "\n".join(lines) + "\n"
+
+
+def gen_gtk4(p):
+    lines = [f"/* {HEADER} */", "/* libadwaita colors, imported by ~/.config/gtk-4.0/gtk.css */", ":root {"]
+    lines += [f"  --{k.replace('_', '-')}: {v};" for k, v in gtk_roles(p).items()]
+    lines.append("}")
+    return "\n".join(lines) + "\n"
+
+
 STARSHIP_BEGIN = "# >>> theme-build palette >>>"
 STARSHIP_END = "# <<< theme-build palette <<<"
 
@@ -198,6 +234,8 @@ def main():
         "ghostty": gen_ghostty(p),
         "btop.theme": gen_btop(p),
         "sddm.conf": gen_sddm(p),
+        "gtk3.css": gen_gtk3(p),
+        "gtk4.css": gen_gtk4(p),
     }
     for name, content in outputs.items():
         (GEN / name).write_text(content)

@@ -54,7 +54,7 @@ window#waybar {
 /* --- Tooltip --- */
 tooltip {
   border: 20px solid transparent;
-  border-image-source: url("./assets/blade.svg");
+  border-image-source: url("./assets/frames/tooltip.svg");
   border-image-slice: 45 93 84 79 fill;
   background-color: @bg;
 }
@@ -71,13 +71,32 @@ tooltip label {
 
 /* --- Left Modules --- */
 
+/* --- Control Menu: far-left module, panel assets/panels/control.svg (left-end cap).
+       Paired with the power button, panel assets/panels/power.svg --- */
+#custom-control {
+  font-size: 20px;
+  color: @secondary;
+  text-shadow: 0 0 5px @secondary;
+  padding: 0 10px;
+  background-image: url("./assets/panels/control.svg");
+  background-size: 100% 85%;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+#custom-control:hover {
+  color: @accent;
+  text-shadow: 0 0 5px @accent;
+}
+
 /* --- Power Menu --- */
 #custom-powermenu {
   font-size: 20px;
   color: @accent;
   text-shadow: 0 0 5px @accent;
   padding: 0 10px;
-  background-image: url("./assets/idk.svg");
+  margin-left: 2px;
+  background-image: url("./assets/panels/power.svg");
   background-size: 100% 85%;
   background-repeat: no-repeat;
   background-position: center;
@@ -159,7 +178,7 @@ tooltip label {
   padding: 0 14px;
   margin-top: 0;
   margin-bottom: 0;
-  background-image: url("./assets/long-panel.svg");
+  background-image: url("./assets/panels/cpu.svg");
   background-size: 100% 85%;
   background-repeat: no-repeat;
   background-position: center;
@@ -183,7 +202,7 @@ tooltip label {
   margin-left: 2px;
   margin-right: 2px;
   padding: 0 8px;
-  background-image: url("./assets/long-panel-v2.svg");
+  background-image: url("./assets/panels/memory.svg");
   background-size: 100% 85%;
   background-repeat: no-repeat;
   background-position: center;

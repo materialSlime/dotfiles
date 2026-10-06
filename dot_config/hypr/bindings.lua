@@ -20,6 +20,9 @@ hl.bind(mainMod .. " + E", hl.dsp.exec_cmd("uwsm-app  -- " .. fileManager))
 hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("pkill -x wofi || wofi --show drun"))
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("pkill -x wofi || wofi --show run"))
 
+-- Control menu: every common action by click/touch (also the waybar 󰍜 button)
+hl.bind(mainMod .. " + X", hl.dsp.exec_cmd("~/.config/wofi/control-menu.sh"))
+
 -- Power Menu
 hl.bind(mainMod .. " + ALT + P", hl.dsp.exec_cmd("~/.config/wofi/power-menu.sh"))
 
@@ -123,8 +126,16 @@ hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true 
 -- hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("hyprctl reload"))
 
 -- Screenshots (hyprshot)
-hl.bind("Print", hl.dsp.exec_cmd("hyprshot -m output -o ~/Pictures/Screenshots"))
+hl.bind("Print", hl.dsp.exec_cmd("hyprshot -m output -m active -o ~/Pictures/Screenshots"))
 hl.bind(mainMod .. " + Print", hl.dsp.exec_cmd("hyprshot -m region -o ~/Pictures/Screenshots"))
+hl.bind(mainMod .. " + ALT + Print", hl.dsp.exec_cmd("hyprshot -m window -m active -o ~/Pictures/Screenshots"))
 
 -- Lock Screen
 hl.bind(mainMod .. "+ ALT + L", hl.dsp.exec_cmd("hyprlock"))
+
+-- Submap "menu": active only while a control-menu.sh wofi is open (the script enters
+-- and leaves it). Right-click anywhere (long-press in Moonlight) closes the menu,
+-- since phone keyboards have no Esc and wofi keeps the keyboard while open.
+hl.define_submap("menu", function()
+	hl.bind("mouse:273", hl.dsp.exec_cmd("pkill -x wofi"))
+end)

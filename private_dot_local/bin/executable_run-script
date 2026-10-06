@@ -1,0 +1,14 @@
+#!/bin/sh
+# Default opener for shell scripts (see ~/.local/share/applications/run-script.desktop).
+#   executable     -> run it in the terminal, keep the window open to read the output
+#   not executable -> open it in nvim (so downloaded scripts never run by accident)
+f=$(realpath "$1")
+
+if [ -x "$f" ]; then
+	exec xdg-terminal-exec --dir="$(dirname "$f")" -- sh -c '
+		"$1"
+		printf "\n[exited with %s] press Enter to close" "$?"
+		read -r _' run-script "$f"
+else
+	exec xdg-terminal-exec -- nvim "$f"
+fi

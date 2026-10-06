@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Run Script
+Comment=Run executable scripts in the terminal; open non-executable ones in nvim
+Exec=/home/neo/.local/bin/run-script %f
+Icon=utilities-terminal
+Terminal=false
+NoDisplay=true
+MimeType=application/x-shellscript;application/x-sh;
