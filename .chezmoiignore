@@ -1,0 +1,4 @@
+.config/tmux/plugins
+.config/theme/backup-*
+.config/theme/gen
+.config/hypr/backups

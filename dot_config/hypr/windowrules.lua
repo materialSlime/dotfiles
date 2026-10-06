@@ -36,3 +36,52 @@ hl.layer_rule({
 	ignore_alpha = false,
 	animation = "slide right",
 })
+
+hl.window_rule({
+	name = "Float modal dialogs",
+	match = { modal = true },
+	float = true,
+	center = true,
+})
+
+hl.window_rule({
+	name = "Float file pickers",
+	match = { title = "^(Open|Save|Select|Choose).*|.*(Open File|Save As|File Upload).*" },
+	float = true,
+	center = true,
+	size = "900 600",
+})
+
+hl.window_rule({
+	name = "Portal file chooser",
+	match = { class = "xdg-desktop-portal-gtk" },
+	float = true,
+	center = true,
+	size = "900 600",
+})
+
+hl.window_rule({
+	name = "Polkit prompt",
+	match = { class = "polkit-gnome-authentication-agent-1" },
+	float = true,
+	center = true,
+	pin = true,
+})
+
+hl.window_rule({
+	name = "Float Utilities",
+	match = {
+		class = "org.gnome.Calculator|org.gnome.FileRoller|nwg-look|Bitwarder|imv",
+	},
+	float = true,
+})
+
+hl.window_rule({
+	name = "Opaque Media",
+	match = {
+		class = "zen|chromium|blender|mpv|imv",
+	},
+	opaque = true,
+})
+
+hl.window_rule({})

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Toggle: if a wofi menu is already open, close it instead of opening another
+pkill -x wofi && exit 0
+
 # Define the options for the power menu
 # Using a simple string with newlines, ensuring no trailing empty line
 options="    Shutdown

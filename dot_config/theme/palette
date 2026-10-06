@@ -1,0 +1,24 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  CENTRAL COLOR PALETTE — the only place colors are defined   ║
+# ║  Edit, then run:  ~/.config/theme/build                      ║
+# ╚══════════════════════════════════════════════════════════════╝
+
+# ── Core ─────────────────────────────────────────────────────────
+bg        = #0E0E17   # background everywhere
+primary   = #F75049   # main accent: borders, alerts
+secondary = #5EF6FF   # text accent, highlights
+accent    = #F3E900   # selection, focus, warnings
+
+# ── Support ──────────────────────────────────────────────────────
+text      = #CDD6F4   # body text (notifications, inputs)
+muted     = #646478   # disabled text, comments, inactive
+surface   = #1A1B2E   # raised panels, input fields
+tertiary  = #246DCE   # minor details (lockscreen numlock, python)
+bright    = #FFFFFF   # brightest highlight
+ansi_magenta = #FF00FF   # terminal only
+ansi_purple  = #9D4EDD   # terminal only
+
+# ── Derived (computed by build if not set here) ──────────────────
+# bg_dark       = bg mixed 30% toward black       (deeper panels)
+# primary_dim   = primary mixed 35% toward bg     (secondary fills)
+# secondary_dim = secondary mixed 65% toward bg   (dimmed text, SDDM)

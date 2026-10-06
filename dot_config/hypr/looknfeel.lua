@@ -1,3 +1,7 @@
+-- Colors come from ~/.config/theme/palette (run ~/.config/theme/build after editing)
+package.path = os.getenv("HOME") .. "/.config/theme/gen/?.lua;" .. package.path
+local c = require("colors")
+
 hl.config({
 	general = {
 		gaps_in = 1,
@@ -6,8 +10,8 @@ hl.config({
 		border_size = 2,
 
 		col = {
-			active_border = { colors = { "rgba(247, 80, 72, 1)", "rgba(241, 181, 55, 1)" }, angle = 90 },
-			inactive_border = "rgba(14, 15, 24, 0.67)",
+			active_border = { colors = { c.primary, c.accent }, angle = 90 },
+			inactive_border = c.rgba("bg", 0.67),
 		},
 		resize_on_border = true,
 		allow_tearing = false,
@@ -24,7 +28,7 @@ hl.config({
 			enabled = true,
 			range = 4,
 			render_power = 3,
-			color = "rgba(14, 15, 24, 0.93)",
+			color = c.rgba("bg", 0.93),
 		},
 		blur = {
 			enabled = true,

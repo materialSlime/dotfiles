@@ -1,0 +1,40 @@
+@import url("file:///home/neo/.config/theme/gen/colors.css"); /* palette: ~/.config/theme/palette */
+
+window#osd {
+    padding: 6px 16px;
+    border-radius: 0px;
+    background: @bg;
+    border: 2px solid @primary;
+}
+
+image {
+    color: @accent;
+    /* This is the property needed for GTK icons */
+    -gtk-icon-shadow: 0 0 10px alpha(@accent, 0.7);
+}
+
+label {
+    color: @accent;
+    font-family: "Rajdhani", sans-serif;
+    font-weight: bold;
+    /* This is for standard text */
+    text-shadow: 0 0 10px alpha(@accent, 0.7);
+}
+
+progressbar {
+    margin: 4px 12px;
+}
+
+progressbar > trough, 
+progressbar > trough > progress {
+    min-height: 6px; 
+    border-radius: 0px;
+}
+
+progressbar > trough {
+    background-color: @surface;
+}
+
+progressbar > trough > progress {
+    background-color: @primary;
+}

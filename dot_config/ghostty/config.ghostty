@@ -30,29 +30,12 @@ keybind = super+control+shift+alt+arrow_left=resize_split:left,100
 keybind = super+control+shift+alt+arrow_right=resize_split:right,100
 
 # Colors (from waybar theme)
-palette = 0=#0e0e17
-palette = 1=#f75049
-palette = 2=#00ffea
-palette = 3=#FFD300
-palette = 4=#f75049
-palette = 5=#ff00ff
-palette = 6=#00ffff
-palette = 7=#cccccc
-palette = 8=#1a1b2e
-palette = 9=#f75049
-palette = 10=#33fff0
-palette = 11=#FFD300
-palette = 12=#9d4edd
-palette = 13=#ff00ff
-palette = 14=#00ffff
-palette = 15=#ffffff
-background = #0e0e17
-foreground = #5ef8ff
-selection-background = #FFD300
-selection-foreground = #000000
 
 # Slowdown mouse scrolling
 mouse-scroll-multiplier = 2.5
 
 # Fix general slowness on hyprland (https://github.com/ghostty-org/ghostty/discussions/3224)
 async-backend = epoll
+
+# Colors: ~/.config/theme/palette -> generated theme
+theme = /home/neo/.config/theme/gen/ghostty
