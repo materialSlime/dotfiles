@@ -2,14 +2,22 @@
 // ║                     CYBERPUNK SDDM THEME                               ║
 // ║  Color palette matched to Hyprland + Waybar + Hyprlock cyberpunk theme  ║
 // ║                                                                        ║
-// ║  LAYOUT: 1:1 port of ~/.config/hypr/hyprlock.conf                      ║
-// ║    Every hyprlock widget is placed with place() using the SAME         ║
+// ║  LAYOUT: port of ~/.config/hypr/hyprlock.conf (center + bottom dock)   ║
+// ║    Center      — big clock, date, user + password                      ║
+// ║    Bottom dock — HOST panel (left), SYS.CTRL 2×2 grid (right)          ║
+// ║    Every hyprlock widget is placed with hx()/hy() using the SAME       ║
 // ║    position / halign / valign values, and font sizes go through pt()   ║
 // ║    so they render at the same pixel size as hyprlock.                  ║
 // ║    Change a value in hyprlock.conf → change the same number here.      ║
 // ║                                                                        ║
+// ║  Differences from hyprlock (a greeter has no session yet):             ║
+// ║    - the media slot is the user's avatar + HOST info (hostname /       ║
+// ║      kernel / OS); avatar.png = ~/.face.icon or the user's initial     ║
+// ║    - LOGOUT's slot in the grid is the session selector                 ║
+// ║                                                                        ║
 // ║  PALETTE:                                                              ║
 // ║    Colors: ~/.config/theme/palette -> theme.conf.user (config.c_<name>)║
+// ║  INSTALL:  ~/.config/theme/build --sddm                                ║
 // ╚══════════════════════════════════════════════════════════════════════════╝
 
 import QtQuick
@@ -33,7 +41,7 @@ Rectangle {
     // Scale factor — hyprlock coordinates are pixels on a 1080p monitor,
     // so 1080 is the reference (s = 1 on the 1920x1080 display).
     readonly property real s: height / 1080
-    // Old 768p scale, only used by the SDDM-only decorations (HUDs, blade).
+    // Old 768p scale, only used by the SDDM-only decorations (particles, blade).
     readonly property real sd: height / 768
 
     // hyprlock font_size is in points rendered at 96 DPI → px = pt * 4/3
@@ -55,17 +63,19 @@ Rectangle {
     // ═══════════════════════════════════════════════════════════════════════
     //   CYBERPUNK COLOR PALETTE — from ~/.config/theme/palette via theme.conf.user
     // ═══════════════════════════════════════════════════════════════════════
-    readonly property color cSecondary:    config.c_secondary     || "#5EF6FF"   // Neon cyan — primary accent
-    readonly property color cAccent:  config.c_accent   || "#F3E900"   // accent — highlight/clock
-    readonly property color cPrimary:     config.c_primary      || "#F75049"   // Alert red — warnings/borders
-    readonly property color cTertiary:    config.c_tertiary     || "#246DCE"   // Deep blue — secondary/subtle
-    readonly property color cBg:      config.c_bg       || "#0E0E17"   // Deep void black
-    readonly property color cSecondaryDim:   config.c_secondary_dim || "#25575F"   // Dimmed foreground
+    readonly property color cSecondary:    config.c_secondary     || "#5EF6FF"   // Neon cyan
+    readonly property color cAccent:       config.c_accent        || "#F3E900"   // clock / highlight
+    readonly property color cPrimary:      config.c_primary       || "#F75049"   // alert red
+    readonly property color cTertiary:     config.c_tertiary      || "#246DCE"   // deep blue
+    readonly property color cText:         config.c_text          || "#CDD6F4"   // body text
+    readonly property color cBg:           config.c_bg            || "#0E0E17"   // void black
+    readonly property color cSecondaryDim: config.c_secondary_dim || "#25575F"
 
-    function secondary(a)   { return Qt.rgba(cSecondary.r, cSecondary.g, cSecondary.b, a) }
-    function accent(a) { return Qt.rgba(cAccent.r, cAccent.g, cAccent.b, a) }
-    function primary(a)    { return Qt.rgba(cPrimary.r, cPrimary.g, cPrimary.b, a) }
-    function tertiary(a)   { return Qt.rgba(cTertiary.r, cTertiary.g, cTertiary.b, a) }
+    function secondary(a) { return Qt.rgba(cSecondary.r, cSecondary.g, cSecondary.b, a) }
+    function accent(a)    { return Qt.rgba(cAccent.r, cAccent.g, cAccent.b, a) }
+    function primary(a)   { return Qt.rgba(cPrimary.r, cPrimary.g, cPrimary.b, a) }
+    function tertiary(a)  { return Qt.rgba(cTertiary.r, cTertiary.g, cTertiary.b, a) }
+    function text(a)      { return Qt.rgba(cText.r, cText.g, cText.b, a) }
 
     // ═══════════════════════════════════════════════════════════════════════
     //   STATE
@@ -75,9 +85,26 @@ Rectangle {
     // 12h clock like hyprlock's %I/%p. Qt's "hh" is only 12h when "AP" is in
     // the same format string, so format once and split.
     property var clockParts: Qt.formatTime(new Date(), "hh mm ss AP").split(" ")
-    property string currentDate:    Qt.formatDate(new Date(), "dddd  //  dd MMMM yyyy")
+    property string currentDate: Qt.formatDate(new Date(), "dddd  //  dd MMMM yyyy")
     property int currentUserIndex: 0
     property string authState: ""   // "", "check", "fail" — mirrors hyprlock
+
+    // live from SDDM; test mode has none, so fall back to the name saved at install
+    // login name of the selected user (avatar file name, initial)
+    readonly property string selectedUser: (typeof userModel !== "undefined" && userModel.count > 0)
+        ? (userModel.data(userModel.index(currentUserIndex, 0), Qt.UserRole + 1) || "") : ""
+
+    // "Hyprland (uwsm-managed)" -> name "HYPRLAND", variant "UWSM"; "Hyprland" -> no variant.
+    // The variant is shown as a small tag under the session name (like SAMURAI
+    // under the username), so the grid keeps hyprlock's column widths.
+    readonly property string sessionFull: (typeof sessionModel !== "undefined" && sessionModel.count > sessionIndex && sessionIndex >= 0 && sessionHelper.currentItem) ? sessionHelper.currentItem.sName : "Default"
+    readonly property string sessionName: sessionFull.replace(/\s*\(.*\)\s*$/, "").toUpperCase()
+    readonly property string sessionVariant: {
+        var m = sessionFull.match(/\(([^)]*?)(-managed)?\)\s*$/)
+        return m ? m[1].toUpperCase() : ""
+    }
+
+    readonly property string hostName: (!isQuickshell && sddm.hostName) ? sddm.hostName : (config.host_name || "localhost")
 
     TextConstants { id: textConstants }
 
@@ -113,7 +140,6 @@ Rectangle {
         }
     }
 
-    // hyprlock fail_timeout = 2000
     Timer {
         id: failTimer
         interval: 2000
@@ -132,8 +158,8 @@ Rectangle {
     }
 
     // ═══════════════════════════════════════════════════════════════════════
-    //   BACKGROUND
-    //   (hyprlock blurs a live screenshot; SDDM has none, so it keeps bg.jpg)
+    //   BACKGROUND — bg.jpg, rendered by ~/.config/theme/sddm/background.py
+    //   (hyprlock blurs a live screenshot; a greeter has none)
     // ═══════════════════════════════════════════════════════════════════════
     Image {
         anchors.fill: parent
@@ -159,7 +185,7 @@ Rectangle {
                 property real dur: 12000
                 property real maxOp: 0.3
 
-                color: Math.random() < 0.15 ? root.cAccent : root.cSecondary
+                color: Math.random() < 0.12 ? root.cSecondary : root.cPrimary
                 width: 2 * root.sd
                 height: 2 * root.sd
                 radius: width / 2
@@ -205,11 +231,7 @@ Rectangle {
         }
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    //   LEFT COLUMN — Clock, Date, User, Input   (hyprlock: halign = left)
-    // ═══════════════════════════════════════════════════════════════════════
-
-    // ── Decorative top accent ──   hyprlock: 80, -50  left/top
+    // ── Top-left header ──   hyprlock: 80, -50  left/top
     Text {
         text: "┌── SYSTEM :: ENCRYPTED ──────────────────────"
         color: root.primary(0.5)
@@ -218,22 +240,55 @@ Rectangle {
         x: root.hx(width, 80, "left"); y: root.hy(height, -50, "top")
     }
 
-    // ── Clock ──   hyprlock: 80, 240  left/center
-    // HH:MM flow in one row (Rajdhani digits are proportional), seconds sit
-    // top-aligned after the minutes and AM/PM sits on the baseline under them.
+    // ═══════════════════════════════════════════════════════════════════════
+    //   CENTER — Clock, date, user + password   (hyprlock: halign = center)
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // ── Clock ──   hyprlock: HH:MM centered, y 170
+    // Rajdhani digits are proportional ("1" is much narrower than "8") and the
+    // font has no tabular digits, so every digit gets a fixed slot as wide as
+    // an "8" — the clock keeps one width all day. The middle digits are centered
+    // in their slots; the first and last are placed by their own ink bounds so
+    // they sit flush with the clock's edges (and the username / password row).
+    // Seconds ride top-aligned after the minutes, AM/PM sits under them.
+    TextMetrics {
+        id: digitMetrics
+        font.family: root.fn
+        font.pixelSize: root.pt(160)
+        font.bold: true
+        text: "8"
+    }
+
+    // ink bounds of the two edge digits
+    TextMetrics { id: firstInk; font: digitMetrics.font; text: root.clockParts[0].charAt(0) }
+    TextMetrics { id: lastInk;  font: digitMetrics.font; text: root.clockParts[1].charAt(1) }
+
+    component Digit: Text {
+        width: digitMetrics.advanceWidth
+        horizontalAlignment: Text.AlignHCenter
+        font.family: root.fn
+        font.pixelSize: root.pt(160)
+        font.bold: true
+    }
+
     Item {
         id: clockGroup
-        width: amPmText.x + Math.max(secondsText.width, amPmText.width)
+        readonly property real slot: digitMetrics.advanceWidth
+        readonly property real hhmmWidth: 4 * slot + colonText.width     // HH:MM only
+        width: secondsText.x + Math.max(secondsText.width, amPmText.width)
         height: hoursText.height
-        x: root.hx(width, 80, "left"); y: root.hy(height, 240, "center")
+        x: root.hx(hhmmWidth, 0, "center"); y: root.hy(height, 170, "center")
 
+        // hour tens: ink starts exactly at the left edge
         Text {
             id: hoursText
-            text: root.clockParts[0]
-            color: root.cAccent
-            font.family: root.fn
-            font.pixelSize: root.pt(160)
-            font.bold: true
+            text: root.clockParts[0].charAt(0); color: root.cAccent
+            font: digitMetrics.font
+            x: -firstInk.tightBoundingRect.x
+        }
+        Digit {
+            id: hours2; text: root.clockParts[0].charAt(1); color: root.cAccent
+            x: clockGroup.slot; anchors.baseline: hoursText.baseline
         }
 
         Text {
@@ -243,18 +298,20 @@ Rectangle {
             font.family: root.fn
             font.pixelSize: root.pt(130)
             font.bold: true
-            anchors.left: hoursText.right
+            x: 2 * clockGroup.slot
             anchors.baseline: hoursText.baseline
         }
 
+        Digit {
+            id: minutes1; text: root.clockParts[1].charAt(0); color: root.cSecondary
+            x: 2 * clockGroup.slot + colonText.width; anchors.baseline: hoursText.baseline
+        }
+        // minute ones: ink ends exactly at the right edge
         Text {
-            id: minutesText
-            text: root.clockParts[1]
-            color: root.cSecondary
-            font.family: root.fn
-            font.pixelSize: root.pt(160)
-            font.bold: true
-            anchors.left: colonText.right
+            id: minutes2
+            text: root.clockParts[1].charAt(1); color: root.cSecondary
+            font: digitMetrics.font
+            x: clockGroup.hhmmWidth - lastInk.tightBoundingRect.x - lastInk.tightBoundingRect.width
             anchors.baseline: hoursText.baseline
         }
 
@@ -265,44 +322,44 @@ Rectangle {
             color: root.secondary(0.35)
             font.family: root.fnMono
             font.pixelSize: root.pt(28)
-            anchors.left: minutesText.right
-            anchors.leftMargin: root.pt(12) * 0.6   // one 12pt mono space
+            x: clockGroup.hhmmWidth + root.pt(12) * 0.6   // one 12pt mono space after HH:MM
             anchors.baseline: hoursText.baseline
             anchors.baselineOffset: -110 * root.s
         }
 
+        // hyprlock: same mono font/size as the seconds, primary 70%
         Text {
             id: amPmText
             text: root.clockParts[3]
             color: root.primary(0.7)
-            font.family: root.fn
-            font.pixelSize: root.pt(18)
-            font.bold: true
+            font.family: root.fnMono
+            font.pixelSize: root.pt(28)
             x: secondsText.x
             anchors.baseline: hoursText.baseline
         }
     }
 
-    // ── Date ──   hyprlock: 100, 95  left/center
+    // ── Date ──   hyprlock: 0, 45  center/center
     Text {
         text: root.currentDate
-        color: root.secondary(0.5)
+        color: root.secondary(0.55)
         font.family: root.fn
         font.pixelSize: root.pt(20)
         font.bold: true
-        x: root.hx(width, 100, "left"); y: root.hy(height, 95, "center")
+        x: root.hx(width, 0, "center"); y: root.hy(height, 45, "center")
     }
 
-    // ── Separator ──   hyprlock: 90, 65  left/center
+    // ── Separator ──   hyprlock: 0, 5  center/center
     Text {
-        text: "─────────────────────────────────────"
-        color: root.secondary(0.12)
+        text: "──────────────────── ◆ ────────────────────"
+        color: root.secondary(0.15)
         font.family: root.fnMono
         font.pixelSize: root.pt(10)
-        x: root.hx(width, 90, "left"); y: root.hy(height, 65, "center")
+        x: root.hx(width, 0, "center"); y: root.hy(height, 5, "center")
     }
 
-    // ── Username ──   hyprlock: 100, -10  left/center
+    // ── Username ──   ink starts at the clock's left edge (hyprlock: -223, -45)
+    TextMetrics { id: userInk; font: userText.font; text: userText.text }
     Text {
         id: userText
         text: {
@@ -313,11 +370,11 @@ Rectangle {
             }
             return "user"
         }
-        color: userMouse.containsMouse ? root.cAccent : root.secondary(0.9)
+        color: userMouse.containsMouse ? root.cSecondary : root.primary(0.95)
         font.family: root.fn
         font.pixelSize: root.pt(28)
         font.bold: true
-        x: root.hx(width, 100, "left"); y: root.hy(height, -10, "center")
+        x: clockGroup.x - userInk.tightBoundingRect.x; y: root.hy(height, -45, "center")
 
         MouseArea {
             id: userMouse
@@ -332,21 +389,23 @@ Rectangle {
         }
     }
 
-    // ── User role tag ──   hyprlock: 100, -42  left/center
+    // ── User role tag ──   centered under the username (hyprlock: -220, -78)
     Text {
         text: "SAMURAI"
         color: root.tertiary(0.5)
         font.family: root.fnMono
         font.pixelSize: root.pt(12)
-        x: root.hx(width, 100, "left"); y: root.hy(height, -42, "center")
+        x: userText.x + (userText.width - width) / 2; y: root.hy(height, -78, "center")
     }
 
-    // ── Input Field ──   hyprlock: size 400x55, 100, -110  left/center
+    // ── Input Field ──   24 px after the username, ends at the clock's right edge
+    //    (hyprlock: size 419x55 at 39, -60 for the user "neo")
     Rectangle {
         id: inputContainer
-        width: 400 * root.s
+        x: userText.x + userText.width + 24 * root.s
+        width: clockGroup.x + clockGroup.hhmmWidth - x
         height: 55 * root.s
-        x: root.hx(width, 100, "left"); y: root.hy(height, -110, "center")
+        y: root.hy(height, -60, "center")
         radius: 3 * root.s
         color: Qt.rgba(cBg.r, cBg.g, cBg.b, 0.85)
         border.width: 2 * root.s
@@ -410,15 +469,6 @@ Rectangle {
         }
     }
 
-    // ── Left panel bottom accent ──   hyprlock: 80, -180  left/center
-    Text {
-        text: "└────────────────────────────────────────────"
-        color: root.secondary(0.15)
-        font.family: root.fnMono
-        font.pixelSize: root.pt(12)
-        x: root.hx(width, 80, "left"); y: root.hy(height, -180, "center")
-    }
-
     // ═══════════════════════════════════════════════════════════════════════
     //   BLADE SLASH ACCENT — triggers on keypress (SDDM only)
     // ═══════════════════════════════════════════════════════════════════════
@@ -431,14 +481,12 @@ Rectangle {
         height: 12 * sd
         clip: true
 
-        // Base line
         Rectangle {
             width: parent.width; height: 1
-            color: root.cSecondaryDim; opacity: 0.15
+            color: root.cPrimary; opacity: 0.15
             anchors.verticalCenter: parent.verticalCenter
         }
 
-        // Animated blade
         Rectangle {
             id: slashBlade
             height: 1.5 * sd
@@ -447,7 +495,7 @@ Rectangle {
             gradient: Gradient {
                 orientation: Gradient.Horizontal
                 GradientStop { position: 0.0; color: "transparent" }
-                GradientStop { position: 0.6; color: root.cSecondary }
+                GradientStop { position: 0.6; color: root.cPrimary }
                 GradientStop { position: 1.0; color: "#FFFFFF" }
             }
 
@@ -493,30 +541,108 @@ Rectangle {
     }
 
     // ═══════════════════════════════════════════════════════════════════════
-    //   RIGHT COLUMN — System Controls   (hyprlock: halign = right)
+    //   BOTTOM DOCK — left: HOST panel · right: system controls
     // ═══════════════════════════════════════════════════════════════════════
 
-    // ── Panel header ──   hyprlock: -80, 0
+    // ── Dock headers ──   hyprlock: 80, 215 left/bottom · -80, 215 right/bottom
     Text {
-        text: "── SYS.CTRL ──┐"
+        text: "┌── HOST ─────────────────"
+        color: root.secondary(0.35)
+        font.family: root.fnMono
+        font.pixelSize: root.pt(12)
+        x: root.hx(width, 80, "left"); y: root.hy(height, 215, "bottom")
+    }
+    Text {
+        text: "───────────────── SYS.CTRL ──┐"
         color: root.primary(0.4)
         font.family: root.fnMono
         font.pixelSize: root.pt(12)
-        x: root.hx(width, -80, "right"); y: root.hy(height, 0, "center")
+        x: root.hx(width, -80, "right"); y: root.hy(height, 215, "bottom")
     }
 
-    // Control label: Rajdhani Bold 18pt, right-aligned at x = -100
+    // ── Avatar ──   square 130×130 at 100, 60 left/bottom (hyprlock's media cover
+    //    is 16:9 in the same spot). avatars/<user>.png is rendered by
+    //    `build --sddm` from ~/.face.icon. Users without one get their initial.
+    Item {
+        width: 130 * root.s
+        height: 130 * root.s
+        x: root.hx(width, 100, "left"); y: root.hy(height, 60, "bottom")
+
+        Rectangle {               // initial fallback
+            anchors.fill: parent
+            anchors.margins: 3 * root.s
+            radius: 8 * root.s
+            color: Qt.rgba(root.cBg.r, root.cBg.g, root.cBg.b, 0.9)
+            visible: avatarImage.status !== Image.Ready
+            Text {
+                anchors.centerIn: parent
+                text: (root.selectedUser || "?").charAt(0).toUpperCase()
+                color: root.cPrimary
+                style: Text.Outline; styleColor: root.primary(0.35)
+                font.family: root.fnMono
+                font.pixelSize: parent.height * 0.62
+                font.bold: true
+            }
+        }
+        Image {
+            id: avatarImage
+            anchors.fill: parent
+            anchors.margins: 3 * root.s
+            source: root.selectedUser ? "avatars/" + root.selectedUser + ".png" : ""
+            fillMode: Image.PreserveAspectCrop
+            smooth: true
+            visible: status === Image.Ready
+        }
+        Rectangle {
+            anchors.fill: parent
+            color: "transparent"
+            radius: 10 * root.s
+            border.width: 3 * root.s
+            border.color: root.primary(0.5)
+        }
+    }
+
+    // ── HOST lines ──   x 260 left/bottom (30 px after the square avatar), y 150 / 115 / 82
+    Text {
+        text: String.fromCodePoint(0xF0379) + "  " + root.hostName.toUpperCase()
+        color: root.primary(0.95)
+        font.family: root.fn
+        font.pixelSize: root.pt(22)
+        font.bold: true
+        x: root.hx(width, 260, "left"); y: root.hy(height, 150, "bottom")
+    }
+    Text {
+        text: "Linux " + (config.host_kernel || "")
+        color: root.text(0.7)
+        font.family: root.fn
+        font.pixelSize: root.pt(16)
+        font.bold: true
+        x: root.hx(width, 260, "left"); y: root.hy(height, 115, "bottom")
+    }
+    Text {
+        text: (config.host_os || "Linux").toUpperCase()
+        color: root.primary(0.9)
+        font.family: root.fnMono
+        font.pixelSize: root.pt(13)
+        font.letterSpacing: 8 * root.s
+        x: root.hx(width, 260, "left"); y: root.hy(height, 82, "bottom")
+    }
+
+    // ── System controls: 2 × 2 grid, each column left-aligned ──   y 140 / 85, bottom
+    //    column left edges at x = -410 / -241 from the screen's right side,
+    //    the same edges as hyprlock (its widest items: REBOOT, SHUTDOWN)
     component Control: Text {
         id: ctl
-        property real py: 0
-        property color baseColor: root.secondary(0.8)
-        property color hoverColor: root.cAccent
+        property real px: -241          // column's left edge, from the right side
+        property real py: 85
+        property color baseColor: root.primary(0.85)
+        property color hoverColor: root.cSecondary
         signal activated()
         color: ctlMouse.containsMouse ? hoverColor : baseColor
         font.family: root.fn
         font.pixelSize: root.pt(18)
         font.bold: true
-        x: root.hx(width, -100, "right"); y: root.hy(height, py, "center")
+        x: root.width + px * root.s; y: root.hy(height, py, "bottom")
         MouseArea {
             id: ctlMouse
             anchors.fill: parent
@@ -526,159 +652,52 @@ Rectangle {
         }
     }
 
-    // ┊ separator at x = -80
-    component Divider: Text {
-        property real py: 0
-        text: "┊"
-        color: root.secondary(0.12)
-        font.family: root.fnMono
-        font.pixelSize: root.pt(12)
-        x: root.hx(width, -80, "right"); y: root.hy(height, py, "center")
-    }
-
-    // ── Suspend ──   hyprlock: -100, -50
     Control {
-        py: -50
+        px: -410; py: 140
         text: "󰒲   SLEEP"
         onActivated: if (typeof sddm !== "undefined") sddm.suspend()
     }
-    Divider { py: -80 }
 
-    // ── Session ──   takes hyprlock's LOGOUT slot: -100, -110
+    // Session selector — takes hyprlock's LOGOUT slot
     Control {
-        py: -110
+        id: sessionCtl
+        px: -241; py: 140
         visible: !root.isQuickshell
-        text: String.fromCodePoint(0xF0379) + "   " + ((typeof sessionModel !== "undefined" && sessionModel.count > root.sessionIndex && root.sessionIndex >= 0 && sessionHelper.currentItem) ? sessionHelper.currentItem.sName : "Default").replace(/\s*\(.*\)/, "").toUpperCase()
-        baseColor: root.accent(0.8)
+        text: String.fromCodePoint(0xF0379) + "   " + root.sessionName
+        baseColor: root.primary(0.85)
         hoverColor: root.cSecondary
         onActivated: {
             if (typeof sessionModel !== "undefined" && sessionModel.rowCount() > 0)
                 root.sessionIndex = (root.sessionIndex + 1) % sessionModel.rowCount()
         }
     }
-    Divider { py: -140 }
 
-    // ── Reboot ──   hyprlock: -100, -170
+    // session variant tag, e.g. UWSM for "Hyprland (uwsm-managed)"
+    Text {
+        visible: sessionCtl.visible && root.sessionVariant !== ""
+        text: root.sessionVariant
+        color: root.tertiary(0.6)
+        font.family: root.fnMono
+        font.pixelSize: root.pt(10)
+        font.letterSpacing: 2 * root.s
+        x: sessionCtl.x + root.pt(18) * 1.55     // under the name, past the icon
+        anchors.top: sessionCtl.bottom
+        anchors.topMargin: -4 * root.s
+    }
+
     Control {
-        py: -170
+        px: -410; py: 85
         text: "󰑓   REBOOT"
-        baseColor: root.accent(0.8)
+        baseColor: root.primary(0.85)
         hoverColor: root.cSecondary
         onActivated: if (typeof sddm !== "undefined") sddm.reboot()
     }
-    Divider { py: -200 }
 
-    // ── Shutdown ──   hyprlock: -100, -230
     Control {
-        py: -230
+        px: -241; py: 85
         text: "󰐥   SHUTDOWN"
-        baseColor: root.primary(0.9)
+        baseColor: root.primary(0.85)
         onActivated: if (typeof sddm !== "undefined") sddm.powerOff()
-    }
-
-    // ── Panel bottom accent ──   hyprlock: -80, -275
-    Text {
-        text: "──────────────┘"
-        color: root.secondary(0.15)
-        font.family: root.fnMono
-        font.pixelSize: root.pt(12)
-        x: root.hx(width, -80, "right"); y: root.hy(height, -275, "center")
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    //   BOTTOM-RIGHT — HUD Interface (SDDM only)
-    // ═══════════════════════════════════════════════════════════════════════
-    Item {
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 40 * sd
-        anchors.right: parent.right
-        anchors.rightMargin: 50 * sd
-        width: 240 * sd
-        height: 90 * sd
-
-        Column {
-            anchors.right: parent.right
-            spacing: 6 * sd
-
-            // Equalizer bars
-            Row {
-                spacing: 3 * sd
-                height: 16 * sd
-                anchors.right: parent.right
-                Repeater {
-                    model: 7
-                    Item {
-                        width: 4 * root.sd
-                        height: 16 * root.sd
-                        Rectangle {
-                            width: 4 * root.sd
-                            anchors.bottom: parent.bottom
-                            color: root.cSecondary
-                            SequentialAnimation on height {
-                                loops: Animation.Infinite
-                                NumberAnimation {
-                                    to: 3 * root.sd
-                                    duration: 180 + index * 70
-                                    easing.type: Easing.InOutSine
-                                }
-                                NumberAnimation {
-                                    to: 14 * root.sd
-                                    duration: 180 + index * 70
-                                    easing.type: Easing.InOutSine
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Separator line
-            Rectangle {
-                width: 200 * sd; height: 1
-                color: root.cSecondary; opacity: 0.3
-                anchors.right: parent.right
-            }
-
-            // Firmware text
-            Text {
-                text: "FIRMWARE VER 2.4.11"
-                color: root.cSecondaryDim
-                font.family: root.fnMono
-                font.pixelSize: 9 * sd
-                font.letterSpacing: 2
-                anchors.right: parent.right
-            }
-
-            // Unauthorized access warning
-            Text {
-                text: "UNAUTHORIZED ACCESS PROHIBITED"
-                color: root.cPrimary
-                font.family: root.fnMono
-                font.pixelSize: 9 * sd
-                font.letterSpacing: 1
-                anchors.right: parent.right
-                SequentialAnimation on opacity {
-                    loops: Animation.Infinite
-                    NumberAnimation { to: 0.25; duration: 900 }
-                    NumberAnimation { to: 0.75; duration: 900 }
-                }
-            }
-
-            // Barcode decoration
-            Row {
-                spacing: 2 * sd
-                anchors.right: parent.right
-                Repeater {
-                    model: 24
-                    Rectangle {
-                        width:  (index % 4 === 0 ? 3 * root.sd : (index % 5 === 0 ? 4 * root.sd : 1.5 * root.sd))
-                        height: (index % 3 === 0 ? 20 * root.sd : 14 * root.sd)
-                        anchors.verticalCenter: parent.verticalCenter
-                        color: root.cSecondaryDim
-                    }
-                }
-            }
-        }
     }
 
     // ═══════════════════════════════════════════════════════════════════════

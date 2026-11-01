@@ -19,10 +19,6 @@ export SUDO_EDITOR=/usr/bin/nvim
 alias grep='grep --color=auto'
 PS1='[\u@\h \W]\$ '
 
-# Hermes completion
-export PATH="$HOME/.local/bin:$PATH"
-eval "$(hermes completion bash)"
-
 # Starship initiator
 eval -- "$(/usr/bin/starship init bash --print-full-init)"
 
@@ -38,6 +34,15 @@ function y() {
 # libvirt: use system daemon so unprivileged virsh sees VMs/networks
 export LIBVIRT_DEFAULT_URI="qemu:///system"
 
-
 # Added by Antigravity CLI installer
 export PATH="/home/neo/.local/bin:$PATH"
+
+# >>> android autocomplete >>>
+_android_complete() {
+  local cur suggestions
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  suggestions=$(android --complete "${COMP_WORDS[@]:1:$COMP_CWORD}" 2>/dev/null)
+  COMPREPLY=($(compgen -W "$suggestions" -- "$cur"))
+}
+complete -F _android_complete android
+# <<< android autocomplete <<<

@@ -8,8 +8,14 @@ Outputs (all in ~/.config/theme/gen/ unless noted):
   colors.sh      shell exports         -> scripts
   ghostty        ghostty theme         -> ghostty/config.ghostty (theme = ...)
   btop.theme     btop theme            -> btop/btop.conf (color_theme = ...)
-  sddm.conf      SDDM theme.conf.user  -> install with: build --sddm (needs sudo)
-                 (one-time: SDDM's Main.qml must be the palette-aware copy in ~/.config/theme/sddm/)
+  sddm.conf      SDDM theme.conf.user (colors + hostname/OS/kernel for the HOST panel)
+  SDDM theme     build --sddm-stage DIR renders the whole theme into DIR (no sudo):
+                   base files (sddm/base/: metadata, theme.conf, Rajdhani font + OFL,
+                   bg.jpg), Main.qml (sddm/), theme.conf.user,
+                   bg.jpg re-rendered by sddm/background.py if that script exists locally,
+                   avatars/<user>.png (~/.face.icon as a square; without one the
+                   login screen draws the user's initial itself)
+                 build --sddm stages it and installs it into the SDDM theme (needs sudo)
   gtk3.css       adw-gtk3 colors       -> gtk-3.0/gtk.css (@import; needs adw-gtk3-dark theme)
   gtk4.css       libadwaita colors     -> gtk-4.0/gtk.css (@import)
   zen.css        Zen browser colors    -> <zen profile>/chrome/palette.css (symlink) -> userChrome.css
@@ -21,7 +27,8 @@ Outputs (all in ~/.config/theme/gen/ unless noted):
 
 Usage: build            generate + reload
        build --no-reload
-       build --sddm     also install the SDDM colors (asks for sudo)
+       build --sddm     also render + install the SDDM theme (asks for sudo)
+       build --sddm-stage DIR   only render the SDDM theme into DIR (used by sddm/preview.sh)
 """
 import os
 import re
@@ -153,10 +160,73 @@ def gen_btop(p):
     return "\n".join(lines) + "\n"
 
 
+def host_info():
+    """OS name and kernel for the SDDM HOST panel (a greeter can't run commands)."""
+    os_name = "Linux"
+    try:
+        for line in open("/etc/os-release"):
+            if line.startswith("NAME="):
+                os_name = line.split("=", 1)[1].strip().strip('"')
+    except OSError:
+        pass
+    return os_name, os.uname().release
+
+
 def gen_sddm(p):
+    os_name, kernel = host_info()
     lines = [f"# {HEADER}", "[General]"] + [f"c_{k}={v}" for k, v in p.items()]
+    lines += [f"host_os={os_name}", f"host_kernel={kernel}", f"host_name={os.uname().nodename}"]
     return "\n".join(lines) + "\n"
 
+
+def stage_sddm(stage):
+    """Render every file of the SDDM theme into `stage` (no sudo needed)."""
+    stage = Path(stage)
+    stage.mkdir(parents=True, exist_ok=True)
+    # base files that never change: metadata.desktop, theme.conf, font/
+    base = THEME / "sddm" / "base"
+    for src in base.rglob("*"):
+        if src.is_file():
+            dst = stage / src.relative_to(base)
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_bytes(src.read_bytes())
+    frame = str(CONFIG / "hypr" / "Scripts" / "cover-frame.py")
+    # background: base/bg.jpg (copied above), re-rendered in the current palette
+    # when the local generator exists (it isn't kept in the dotfiles repo)
+    gen_bg = THEME / "sddm" / "background.py"
+    if gen_bg.exists():
+        subprocess.run([sys.executable, str(gen_bg), str(stage / "bg.jpg")], check=True)
+    # avatar: ~/.face.icon (or ~/.face) as a 512px square, saved per user as
+    # avatars/<user>.png. It's copied into the theme because SDDM can't read a
+    # private home folder. Users without a picture get their initial, drawn by Main.qml.
+    face = next((f for f in (Path.home() / ".face.icon", Path.home() / ".face") if f.is_file()), None)
+    if face:
+        (stage / "avatars").mkdir(exist_ok=True)
+        user = os.environ.get("USER") or Path.home().name
+        subprocess.run([sys.executable, frame, "square", str(face), str(stage / "avatars" / f"{user}.png")], check=True)
+    (stage / "theme.conf.user").write_bytes((GEN / "sddm.conf").read_bytes())
+    (stage / "Main.qml").write_bytes((THEME / "sddm" / "Main.qml").read_bytes())
+    return stage
+
+
+def install_sddm():
+    """Stage the theme, then install it with sudo."""
+    stage = stage_sddm(GEN / "sddm-stage")
+    # keep the original background / QML once, the first time this runs
+    for name in ("bg.jpg", "Main.qml"):
+        src, orig = SDDM_DIR / name, SDDM_DIR / f"{name}.orig"
+        if src.exists() and not orig.exists():
+            subprocess.run(["sudo", "cp", str(src), str(orig)])
+    ok = True
+    # every staged file, base files included; -D creates the theme folder on a fresh system
+    for src in sorted(f for f in stage.rglob("*") if f.is_file()):
+        dst = SDDM_DIR / src.relative_to(stage)
+        ok &= subprocess.run(["sudo", "install", "-D", "-m644", str(src), str(dst)]).returncode == 0
+    # files from earlier versions of the dock that are no longer used
+    for old in ("host.png", "avatar.png"):
+        if (SDDM_DIR / old).exists():
+            subprocess.run(["sudo", "rm", "-f", str(SDDM_DIR / old)])
+    print(f"sddm: {'installed theme into ' + str(SDDM_DIR) if ok else 'install failed'}")
 
 def gtk_roles(p):
     """libadwaita / adw-gtk3 named colors, mapped onto palette roles."""
@@ -338,10 +408,10 @@ def main():
     svgs = gen_svgs(p)
     print(f"generated {len(outputs)} files + {svgs} svgs in {GEN}")
 
+    if "--sddm-stage" in args:
+        print(f"sddm: staged theme in {stage_sddm(args[args.index('--sddm-stage') + 1])}")
     if "--sddm" in args:
-        dest = SDDM_DIR / "theme.conf.user"
-        r = subprocess.run(["sudo", "install", "-m644", str(GEN / "sddm.conf"), str(dest)])
-        print(f"sddm: {'installed ' + str(dest) if r.returncode == 0 else 'install failed'}")
+        install_sddm()
     if "--no-reload" not in args:
         reload_apps()
         print("reloaded hyprland, waybar, swaync, swayosd, ghostty, tmux (btop/starship: next launch/prompt)")

@@ -1,60 +1,82 @@
 #!/bin/bash
 # ╔══════════════════════════════════════════════════════════════╗
 # ║  Hyprlock Media Player — Album Art Fetcher                  ║
-# ║  Saves current album art to /tmp for the image widget       ║
+# ║  Prints the path of the current cover for the image widget  ║
 # ╚══════════════════════════════════════════════════════════════╝
 #
-# Called by hyprlock's image { reload_cmd } to keep art updated.
-# Handles: Spotify, Firefox, Chromium, mpv, VLC, any MPRIS player.
-# Outputs the path to the image file on stdout.
+# Called by hyprlock's image { reload_cmd } every reload_time seconds.
+# Each cover is fetched once per track, converted to real PNG and cached as
+# /tmp/hyprlock-art/<hash>.png, so the printed path changes with the track and
+# hyprlock reloads it. If there's no player, no art, or the download fails,
+# a transparent placeholder is shown instead of an old cover.
+# Every image is 480x270 (16:9, made by cover-frame.py) so the dock never
+# shifts; with no player at all, a HOST tile is shown instead.
 
-ART_PATH="/tmp/hyprlock_album_art.png"
-FALLBACK_PATH="/tmp/hyprlock_album_art_fallback.png"
+CACHE="/tmp/hyprlock-art"
+EMPTY="$CACHE/empty.png"
+mkdir -p "$CACHE"
 
-# Create a cyberpunk fallback icon if it doesn't exist (a 1x1 transparent pixel)
-if [ ! -f "$FALLBACK_PATH" ]; then
-    # Tiny transparent PNG — won't show visually but prevents hyprlock errors
-    printf '\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n\xb4\x00\x00\x00\x00IEND\xaeB`\x82' > "$FALLBACK_PATH" 2>/dev/null
-fi
+# transparent placeholder (made with PIL so libpng accepts it; the old
+# hand-written bytes had a bad CRC and hyprlock refused to load them)
+[ -s "$EMPTY" ] || python3 -c 'import sys; from PIL import Image; Image.new("RGBA", (8, 8), (0, 0, 0, 0)).save(sys.argv[1], "PNG")' "$EMPTY"
 
-# Check if any player is running
-STATUS=$(playerctl status 2>/dev/null)
-if [ -z "$STATUS" ] || [ "$STATUS" = "Stopped" ]; then
-    # No player active — use fallback
-    cp "$FALLBACK_PATH" "$ART_PATH" 2>/dev/null
-    echo "$ART_PATH"
+FRAME=~/.config/hypr/Scripts/cover-frame.py
+HOST="$CACHE/host.png"
+
+PLAYER=$(~/.config/hypr/Scripts/active-player.sh)
+if [ -z "$PLAYER" ]; then
+    [ -s "$HOST" ] || python3 "$FRAME" host "$HOST" 2>/dev/null
+    [ -s "$HOST" ] && echo "$HOST" || echo "$EMPTY"
     exit 0
 fi
 
-# Get the art URL from playerctl
-ART_URL=$(playerctl metadata mpris:artUrl 2>/dev/null)
-
-if [ -z "$ART_URL" ]; then
-    # No art available (common for browsers, some players)
-    cp "$FALLBACK_PATH" "$ART_PATH" 2>/dev/null
-    echo "$ART_PATH"
-    exit 0
+URL=$(playerctl -p "$PLAYER" metadata mpris:artUrl 2>/dev/null)
+if [ -z "$URL" ]; then
+    # Browsers often send no cover for YouTube, only the page URL:
+    # use YouTube's standard thumbnail for that video instead
+    PAGE=$(playerctl -p "$PLAYER" metadata xesam:url 2>/dev/null)
+    ID=$(printf '%s' "$PAGE" | sed -nE 's#.*(youtube\.com/(watch\?(.*&)?v=|shorts/|embed/)|youtu\.be/)([A-Za-z0-9_-]{11}).*#\4#p')
+    [ -n "$ID" ] && URL="https://i.ytimg.com/vi/$ID/mqdefault.jpg"
 fi
+[ -z "$URL" ] && { echo "$EMPTY"; exit 0; }
 
-# Handle different URL schemes
-case "$ART_URL" in
-    file://*)
-        # Local file — just copy it
-        LOCAL_PATH="${ART_URL#file://}"
-        cp "$LOCAL_PATH" "$ART_PATH" 2>/dev/null
-        ;;
+case "$URL" in
     http://*|https://*)
-        # Remote URL — download with curl (silent, timeout, overwrite)
-        curl -sL --max-time 3 -o "$ART_PATH" "$ART_URL" 2>/dev/null
+        # remote cover: one download per URL
+        OUT="$CACHE/$(printf '%s' "$URL" | md5sum | cut -c1-16).png"
+        TMP="$OUT.part"
+        [ -s "$OUT" ] || curl -sL --connect-timeout 5 --max-time 10 -o "$TMP" "$URL" 2>/dev/null
         ;;
     *)
-        # Unknown scheme — try as file path
-        if [ -f "$ART_URL" ]; then
-            cp "$ART_URL" "$ART_PATH" 2>/dev/null
-        else
-            cp "$FALLBACK_PATH" "$ART_PATH" 2>/dev/null
+        # local cover file. Browsers may reuse the same temp path for a new
+        # cover, so the cache is keyed on the image's content, not its path.
+        SRC="${URL#file://}"
+        TMP="$CACHE/local.part"
+        if ! cp "$SRC" "$TMP" 2>/dev/null; then
+            # Flatpak apps (e.g. Chrome) keep it in their private /tmp:
+            # read it from inside whichever running instance has it
+            for inst in $(flatpak ps --columns=instance 2>/dev/null); do
+                timeout 3 flatpak enter "$inst" cat "$SRC" >"$TMP" 2>/dev/null && [ -s "$TMP" ] && break
+                rm -f "$TMP"
+            done
         fi
+        [ -s "$TMP" ] || { rm -f "$TMP"; echo "$EMPTY"; exit 0; }
+        OUT="$CACHE/$(md5sum <"$TMP" | cut -c1-16).png"
+        [ -s "$OUT" ] && rm -f "$TMP"
         ;;
 esac
+if [ ! -s "$OUT" ]; then
+    # covers are often JPEG and come in any shape: fit each one into the
+    # 16:9 frame as a real PNG (see cover-frame.py)
+    if [ -s "$TMP" ] && python3 "$FRAME" frame "$TMP" "$OUT" 2>/dev/null; then
+        rm -f "$TMP"
+    else
+        rm -f "$TMP" "$OUT"
+        echo "$EMPTY"; exit 0
+    fi
+fi
 
-echo "$ART_PATH"
+# keep the cache small: drop covers older than a day
+find "$CACHE" -name '*.png' ! -name empty.png ! -name host.png -mmin +1440 -delete 2>/dev/null
+
+echo "$OUT"

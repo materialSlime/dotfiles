@@ -1,0 +1,8 @@
+[SddmGreeterTheme]
+Name=cyberpunk
+Description=Cyberpunk SDDM Theme — matched to Hyprlock/Waybar cyberpunk palette
+Author=neo
+Type=sddm-theme
+MainScript=Main.qml
+ConfigFile=theme.conf
+QtVersion=6

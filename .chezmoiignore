@@ -2,3 +2,10 @@
 .config/theme/backup-*
 .config/theme/gen
 .config/hypr/backups
+README.md
+.config/theme/sddm/background.py
+Pictures/Wallpapers/gen_walls.py
+.config/waybar/assets/archive
+.config/hypr/.config
+.config/hypr/Fonts
+.config/theme/__pycache__
