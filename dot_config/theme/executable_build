@@ -12,7 +12,12 @@ Outputs (all in ~/.config/theme/gen/ unless noted):
                  (one-time: SDDM's Main.qml must be the palette-aware copy in ~/.config/theme/sddm/)
   gtk3.css       adw-gtk3 colors       -> gtk-3.0/gtk.css (@import; needs adw-gtk3-dark theme)
   gtk4.css       libadwaita colors     -> gtk-4.0/gtk.css (@import)
+  zen.css        Zen browser colors    -> <zen profile>/chrome/palette.css (symlink) -> userChrome.css
   starship.toml  palette block rewritten in place between the theme-build markers
+  waybar/        recolored copies of ~/.config/waybar/assets/{panels,frames}/*.svg -> waybar/style.css
+  wofi/          recolored copies of ~/.config/wofi/shared/assets/*.svg                  -> wofi/*.css
+  swaync/        recolored copies of ~/.config/swaync/assets/*.svg                -> swaync/style.css
+                 (sources keep their Inkscape colors; SVG_COLORS maps each one to a palette role)
 
 Usage: build            generate + reload
        build --no-reload
@@ -187,6 +192,95 @@ def gen_gtk4(p):
     return "\n".join(lines) + "\n"
 
 
+def gen_zen(p):
+    """Zen browser chrome colors. Zen derives most of its UI from a few variables
+    (see zen-styles/zen-theme.css inside /opt/zen-browser-bin/browser/omni.ja):
+    --zen-primary-color is mixed into tints, hover and selection; --zen-branding-dark/
+    -paper are its dark-mode background/foreground. !important beats both Zen's own
+    sheets and the workspace gradient, which Zen sets as an inline style."""
+    v = {
+        "--zen-branding-dark": p["bg"],
+        "--zen-branding-paper": p["text"],
+        "--zen-primary-color": p["primary"],
+        "--zen-main-browser-background": p["bg"],
+        "--zen-main-browser-background-toolbar": p["bg"],
+        "--zen-themed-toolbar-bg-transparent": p["bg"],
+        "--zen-dialog-background": p["surface"],
+        "--zen-colors-border": p["primary_dim"],
+        "--arrowpanel-background": p["surface"],
+        "--arrowpanel-color": p["text"],
+        "--toolbox-textcolor": p["text"],
+        "--focus-outline-color": p["accent"],
+    }
+    lines = [f"/* {HEADER} */",
+             "/* Zen browser colors, imported by <profile>/chrome/userChrome.css via palette.css */",
+             ":root {"]
+    lines += [f"  {k}: {c} !important;" for k, c in v.items()]
+    lines.append("}")
+    # The frame behind tabs/sidebar is painted by these two elements, and Zen's theme
+    # picker sets the variables inline ON them (ZenGradientGenerator.mjs), which wins
+    # over anything inherited from :root. Target them directly; *-old is the value
+    # Zen crossfades from when switching workspaces.
+    bg_vars = ["--zen-main-browser-background", "--zen-main-browser-background-toolbar",
+               "--zen-main-browser-background-old", "--zen-main-browser-background-toolbar-old"]
+    lines.append("#zen-browser-background,")
+    lines.append("#zen-toolbar-background {")
+    lines += [f"  {k}: {p['bg']} !important;" for k in bg_vars]
+    lines.append("}")
+    return "\n".join(lines) + "\n"
+
+
+# Colors the waybar/wofi SVGs are drawn with in Inkscape -> what build paints them with.
+# A role name, or (role, t) = that role mixed t toward bg. Add a line here when an
+# SVG uses a new color; build warns about any it doesn't know and leaves it as is.
+SVG_COLORS = {
+    "#0E0F18": "bg",                # panel fill
+    "#C7373E": ("primary", 0.2),    # panel outline
+    "#682628": ("primary", 0.62),   # tooltip inner fill
+    "#522226": ("primary", 0.7),    # memory panel inner fill
+    "#000000": None,                # tooltip shadow: keep
+    "#1A1B2E": "surface",           # wofi field/highlight fill
+    "#F3E900": "accent",            # wofi highlight
+}
+SVG_COLOR_RE = re.compile(r"((?:fill|stroke|stop-color)\s*(?::|=\s*\")\s*)(#[0-9A-Fa-f]{6})")
+
+
+# source dir -> output dir (under gen/)
+SVG_DIRS = {
+    CONFIG / "waybar" / "assets" / "panels": "waybar/panels",
+    CONFIG / "waybar" / "assets" / "frames": "waybar/frames",
+    CONFIG / "wofi" / "shared" / "assets": "wofi",
+    CONFIG / "swaync" / "assets": "swaync",
+}
+
+
+def gen_svgs(p):
+    unknown = set()
+
+    def recolor(m):
+        src = m[2].upper()
+        if src not in SVG_COLORS:
+            unknown.add(src)
+            return m[0]
+        role = SVG_COLORS[src]
+        if role is None:
+            return m[0]
+        new = mix(p[role[0]], p["bg"], role[1]) if isinstance(role, tuple) else p[role]
+        return m[1] + new
+
+    count = 0
+    for src_dir, out in SVG_DIRS.items():
+        out_dir = GEN / out
+        out_dir.mkdir(parents=True, exist_ok=True)
+        for svg in sorted(src_dir.glob("*.svg")):
+            # no header comment: GTK only sniffs the first few hundred bytes for '<svg'
+            (out_dir / svg.name).write_text(SVG_COLOR_RE.sub(recolor, svg.read_text()))
+            count += 1
+    for c in sorted(unknown):
+        print(f"svg: {c} not in SVG_COLORS, left unchanged")
+    return count
+
+
 STARSHIP_BEGIN = "# >>> theme-build palette >>>"
 STARSHIP_END = "# <<< theme-build palette <<<"
 
@@ -236,11 +330,13 @@ def main():
         "sddm.conf": gen_sddm(p),
         "gtk3.css": gen_gtk3(p),
         "gtk4.css": gen_gtk4(p),
+        "zen.css": gen_zen(p),
     }
     for name, content in outputs.items():
         (GEN / name).write_text(content)
     patch_starship(p)
-    print(f"generated {len(outputs)} files in {GEN}")
+    svgs = gen_svgs(p)
+    print(f"generated {len(outputs)} files + {svgs} svgs in {GEN}")
 
     if "--sddm" in args:
         dest = SDDM_DIR / "theme.conf.user"

@@ -30,16 +30,17 @@
   "transition-time": 200,
   "hide-on-clear": false,
   "hide-on-action": true,
-  "text-empty": "All clear",
+  "text-empty": "NO NEW MESSAGES",
   "script-fail-notify": true,
   "scripts": {},
   "notification-visibility": {},
   "widgets": [
-    "title",
-    "dnd",
+    "label#header",
     "buttons-grid",
+    "dnd",
     "mpris",
     "volume",
+    "title",
     "notifications",
     "inhibitors"
   ],
@@ -48,17 +49,17 @@
       "vexpand": true
     },
     "inhibitors": {
-      "text": "Inhibitors",
-      "button-text": "Clear All",
+      "text": "INHIBITORS",
+      "button-text": "CLEAR",
       "clear-all-button": true
     },
     "title": {
-      "text": "Control Center",
+      "text": "NOTIFICATIONS",
       "clear-all-button": true,
-      "button-text": "  Clear"
+      "button-text": "CLEAR"
     },
     "dnd": {
-      "text": "  Do Not Disturb"
+      "text": "DO NOT DISTURB"
     },
     "mpris": {
       "blacklist": [],
@@ -73,30 +74,55 @@
       "show-per-app-label": true,
       "expand-per-app": false,
       "empty-list-label": "No audio streams",
-      "expand-button-label": "  Apps",
-      "collapse-button-label": "  Hide",
+      "expand-button-label": "APPS",
+      "collapse-button-label": "HIDE",
       "animation-type": "slide_down",
       "animation-duration": 200
     },
     "buttons-grid": {
+      "buttons-per-row": 4,
       "actions": [
         {
-          "label": "󰍬",
-          "command": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
+          "label": "󰍭",
+          "type": "toggle",
+          "command": "~/.config/swaync/scripts/toggle.sh mic",
+          "update-command": "~/.config/swaync/scripts/toggle.sh mic status"
+        },
+        {
+          "label": "󰊗",
+          "type": "toggle",
+          "command": "~/.config/swaync/scripts/toggle.sh gamemode",
+          "update-command": "~/.config/swaync/scripts/toggle.sh gamemode status"
+        },
+        {
+          "label": "󰑊",
+          "type": "toggle",
+          "command": "~/.config/swaync/scripts/toggle.sh record",
+          "update-command": "~/.config/swaync/scripts/toggle.sh record status"
         },
         {
           "label": "󰌵",
-          "command": "pkill hyprsunset || hyprsunset -t 4000"
+          "type": "toggle",
+          "command": "~/.config/swaync/scripts/toggle.sh nightlight",
+          "update-command": "~/.config/swaync/scripts/toggle.sh nightlight status"
         },
         {
-          "label": "",
-          "command": "hyprshot -m region -o ~/Pictures/Screenshots"
+          "label": "󰹑",
+          "command": "swaync-client -cp >/dev/null; sleep 0.3; hyprshot -m region -o ~/Pictures/Screenshots"
+        },
+        {
+          "label": "󰅌",
+          "command": "swaync-client -cp >/dev/null; sleep 0.3; ~/.config/wofi/clipboard/clipboard.sh"
         },
         {
           "label": "󰏘",
-          "command": "nwg-look"
+          "command": "swaync-client -cp >/dev/null; sleep 0.3; uwsm app -- nwg-look"
         }
       ]
+    },
+    "label#header": {
+      "text": "SYS.CTRL",
+      "max-lines": 1
     }
   }
 }

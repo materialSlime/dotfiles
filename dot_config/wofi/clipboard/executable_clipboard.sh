@@ -2,7 +2,7 @@
 
 # Toggle: if a wofi menu is already open, close it instead of opening another
 pkill -x wofi && exit 0
-# ~/.config/wofi/clipboard.sh
+# ~/.config/wofi/clipboard/clipboard.sh
 
 ACTION="${1:-paste}"
 CACHE="/tmp/cliphist_cache"
@@ -20,13 +20,13 @@ if [ "$ACTION" == "delete" ]; then
     entries="󰃢   Clear All History\n$(cut -f2- "$CACHE")"
     chosen_text=$(echo -e "$entries" | wofi --dmenu \
         --prompt "Delete from Clipboard" \
-        --style ~/.config/wofi/power-style.css \
+        --style ~/.config/wofi/shared/menu.css \
         --cache-file=/dev/null)
     
     [ -z "$chosen_text" ] && exit 0
     
     if [[ "$chosen_text" == "󰃢   Clear All History" ]]; then
-        confirm=$(printf "Yes\nNo" | wofi --dmenu --lines 2 --prompt "Wipe all history?" --style ~/.config/wofi/power-style.css)
+        confirm=$(printf "Yes\nNo" | wofi --dmenu --lines 2 --prompt "Wipe all history?" --style ~/.config/wofi/shared/menu.css)
         [[ "$confirm" == "Yes" ]] && cliphist wipe && notify-send "Clipboard" "History cleared"
     else
         # Match the exact text in the cache file to grab the ID back
@@ -40,7 +40,7 @@ else
     # Hide the ID using cut, send clean text to Wofi
     chosen_text=$(cut -f2- "$CACHE" | wofi --dmenu \
         --prompt "Clipboard" \
-        --style ~/.config/wofi/power-style.css \
+        --style ~/.config/wofi/shared/menu.css \
         --cache-file=/dev/null)
 
     [ -z "$chosen_text" ] && exit 0

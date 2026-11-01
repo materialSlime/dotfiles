@@ -1,0 +1,85 @@
+@import url("file:///home/neo/.config/theme/gen/colors.css"); /* palette: ~/.config/theme/palette */
+
+window {
+    margin: 0px;
+    /* transparent so the frame's cut corners (on #outer-box) show the desktop;
+       GTK doesn't draw borders on wofi's toplevel window, so the frame can't live here */
+    border: none;
+    background-color: transparent;
+    border-radius: 0px;
+    font-family: "Rajdhani", sans-serif;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+#input {
+    /* chamfered field: ~/.config/wofi/shared/assets/input.svg (9-slice, 10px edges) */
+    margin: 10px;
+    border: 10px solid transparent;
+    border-image-source: url("file:///home/neo/.config/theme/gen/wofi/input.svg");
+    border-image-slice: 10;
+    border-image-width: 10px;
+    border-image-repeat: stretch;
+    border-radius: 0px;
+    background-color: @surface;
+    background-clip: padding-box;
+    color: @text;
+    padding: 2px 4px;
+}
+
+/* the field's own outline replaces the theme's focus ring */
+#input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+#inner-box {
+    margin: 5px;
+    background-color: transparent;
+}
+
+/* 9-slice frame: ~/.config/wofi/shared/assets/menu.svg, recolored by ~/.config/theme/build.
+   Drawn at half size; the top-right corner is bigger (88x56 -> 44x28px) to fit the hatch,
+   and extends past the 20px border into the padding. Background is clipped to inside the frame
+   so the cut corners stay see-through. */
+#outer-box {
+    margin: 0px;
+    padding: 5px;
+    border: 20px solid transparent;
+    border-image-source: url("file:///home/neo/.config/theme/gen/wofi/menu.svg");
+    border-image-slice: 56 88 40 40; /* no "fill": GTK rejects it and drops the whole property */
+    border-image-width: 28px 44px 20px 20px;
+    border-image-repeat: stretch;
+    background-color: @bg;
+    background-clip: padding-box;
+}
+
+/* Every entry reserves the highlight's edges (transparent) so selecting one doesn't
+   shift the text; the selected one draws ~/.config/wofi/shared/assets/selected.svg there */
+#entry {
+    padding: 4px 2px;
+    border: 8px solid transparent;
+    border-width: 8px 16px 8px 10px;
+    border-radius: 0px;
+    color: @primary;
+}
+
+#entry:selected {
+    border-image-source: url("file:///home/neo/.config/theme/gen/wofi/selected.svg");
+    border-image-slice: 8 16 8 10;
+    border-image-width: 8px 16px 8px 10px;
+    border-image-repeat: stretch;
+    background-color: @surface;
+    background-clip: padding-box;
+    color: @accent;
+    text-shadow: 0 0 10px @accent;
+}
+
+#text {
+    text-shadow: 0 0 10px @primary;
+}
+
+#scroll {
+    margin: 0px;
+    padding: 0px;
+}

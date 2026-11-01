@@ -1,0 +1,63 @@
+@import url("file:///home/neo/.config/theme/gen/colors.css"); /* palette: ~/.config/theme/palette */
+
+/* Wallpaper filmstrip (wallpaper-picker.sh). Same frame as the other wofi menus. */
+
+window {
+    margin: 0px;
+    border: none;
+    background-color: transparent;
+    font-family: "Rajdhani", sans-serif;
+}
+
+/* search is hidden; typing still filters */
+#input {
+    margin: 0px;
+    min-height: 0px;
+}
+
+#outer-box {
+    margin: 0px;
+    padding: 4px 10px;
+    border: 20px solid transparent;
+    border-image-source: url("file:///home/neo/.config/theme/gen/wofi/menu.svg");
+    border-image-slice: 56 88 40 40;
+    border-image-width: 28px 44px 20px 20px;
+    border-image-repeat: stretch;
+    background-color: alpha(@bg, 0.92);
+    background-clip: padding-box;
+}
+
+#inner-box,
+#scroll {
+    margin: 0px;
+    background-color: transparent;
+}
+
+/* each thumbnail reserves the highlight edge so selection doesn't shift the row */
+#entry {
+    margin: 0px 4px;
+    padding: 0px;
+    border: 3px solid transparent;
+    border-radius: 0px;
+    background: none;
+    opacity: 0.55;
+}
+
+#entry:selected {
+    border-color: @accent;
+    background: none;
+    opacity: 1;
+    box-shadow: 0 0 14px alpha(@accent, 0.45);
+}
+
+#img {
+    margin: 0px;
+}
+
+/* names are only there for type-to-filter */
+#text {
+    font-size: 1px;
+    margin: 0px;
+    padding: 0px;
+    color: transparent;
+}

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="48" viewBox="0 0 120 48">
+  <!-- 9-slice highlight for wofi #entry:selected (border-image-slice: 8 16 8 10, drawn 1:1).
+       Details stay inside those edges. Recolored by ~/.config/theme/build (SVG_COLORS). -->
+  <!-- panel: thin yellow outline, cut bottom-right corner -->
+  <path d="M 0.5,0.5 H 119.5 V 39.5 L 111.5,47.5 H 0.5 Z"
+        style="fill:#1a1b2e;stroke:#f3e900;stroke-width:1;stroke-opacity:0.45"/>
+  <!-- solid yellow bar on the left -->
+  <path d="M 0,0 H 5 V 48 H 0 Z" style="fill:#f3e900"/>
+  <!-- three ticks, top-right -->
+  <path d="M 106,3 H 108 V 5 H 106 Z" style="fill:#f3e900"/>
+  <path d="M 110,3 H 112 V 5 H 110 Z" style="fill:#f3e900"/>
+  <path d="M 114,3 H 116 V 5 H 114 Z" style="fill:#f3e900"/>
+</svg>

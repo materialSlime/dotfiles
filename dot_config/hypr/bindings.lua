@@ -17,14 +17,14 @@ hl.bind(mainMod .. " + SHIFT + RETURN", hl.dsp.exec_cmd("uwsm-app  -- " .. brows
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd("uwsm-app  -- " .. fileManager))
 
 -- Launch launcher
-hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("pkill -x wofi || wofi --show drun"))
-hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("pkill -x wofi || wofi --show run"))
+hl.bind(mainMod .. " + SPACE", hl.dsp.exec_cmd("pkill -x wofi || wofi --show drun --style ~/.config/wofi/launcher/style.css"))
+hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("pkill -x wofi || wofi --show run --style ~/.config/wofi/launcher/style.css"))
 
 -- Control menu: every common action by click/touch (also the waybar 󰍜 button)
-hl.bind(mainMod .. " + X", hl.dsp.exec_cmd("~/.config/wofi/control-menu.sh"))
+hl.bind(mainMod .. " + X", hl.dsp.exec_cmd("~/.config/wofi/control-menu/control-menu.sh"))
 
 -- Power Menu
-hl.bind(mainMod .. " + ALT + P", hl.dsp.exec_cmd("~/.config/wofi/power-menu.sh"))
+hl.bind(mainMod .. " + ALT + P", hl.dsp.exec_cmd("~/.config/wofi/control-menu/power-menu.sh"))
 
 -- Inhibit Sleep
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd("~/.config/waybar/scripts/caffeine.sh toggle"))
@@ -35,16 +35,21 @@ hl.bind(mainMod .. " + Q", hl.dsp.window.close())
 -- Toggle topBar
 hl.bind(mainMod .. " + W", hl.dsp.exec_cmd("pkill " .. topBar .. " || setsid " .. topBar))
 
+-- WallpaperSecletor
+hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd("~/.config/wofi/wallpaper/wallpaper-picker.sh"))
+hl.bind(mainMod .. " + ALT + W", hl.dsp.exec_cmd("~/.config/wofi/wallpaper/wallpaper.sh next"))
 -- Toggle swaync control panel
 hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("swaync-client -t -sw"))
 -- Cliphist History
-hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("~/.config/wofi/clipboard.sh"))
-hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("~/.config/wofi/clipboard.sh delete"))
+hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("~/.config/wofi/clipboard/clipboard.sh"))
+hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("~/.config/wofi/clipboard/clipboard.sh delete"))
 
 -- Access TUI
 hl.bind(mainMod .. " + CTRL + B", hl.dsp.exec_cmd("uwsm app -- xdg-terminal-exec --title=floating-tui bluetui"))
-hl.bind(mainMod .. " + CTRL + W", hl.dsp.exec_cmd("uwsm app -- xdg-terminal-exec --title=floating-tui impala"))
 hl.bind(mainMod .. " + CTRL + A", hl.dsp.exec_cmd("uwsm app -- xdg-terminal-exec --title=floating-tui wiremix"))
+
+-- EagleEye cameras on workspace 6 (the script toggles: press again to close them)
+hl.bind(mainMod .. " + CTRL + E", hl.dsp.exec_cmd("~/.local/bin/eagleEye.sh"))
 
 -- Move focus (vim-style: HJKL)
 hl.bind(mainMod .. " + H", hl.dsp.focus({ direction = "left" }))
@@ -98,7 +103,7 @@ hl.bind(mainMod .. " + P", hl.dsp.window.pin())
 -- hl.bind(mainMod .. " + RETURN", hl.dsp.window.swap_next())
 
 -- Physical PowerButton
-hl.bind("XF86PowerOff", hl.dsp.exec_cmd("~/.config/wofi/power-menu.sh"))
+hl.bind("XF86PowerOff", hl.dsp.exec_cmd("~/.config/wofi/control-menu/power-menu.sh"))
 
 -- Laptop multimedia keys for volume and LCD brightness
 hl.bind(

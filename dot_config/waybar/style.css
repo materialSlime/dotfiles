@@ -23,7 +23,7 @@ window#waybar {
 #custom-clock,
 #battery,
 #cpu,
-#network,
+#custom-network,
 #pulseaudio,
 #tray,
 #bluetooth,
@@ -41,20 +41,29 @@ window#waybar {
   padding: 0 6px;
 }
 
+/* On = the PC won't sleep; it breathes so it catches the eye */
+@keyframes caffeine-breathe {
+  0%   { opacity: 1; }
+  50%  { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
 #custom-caffeine.on {
   color: @accent;
-  text-shadow: 0 0 8px @accent;
+  text-shadow: 0 0 3px @accent;
+  animation: caffeine-breathe 2.4s ease-in-out infinite;
 }
 
 #custom-caffeine.off {
   color: @secondary;
+  text-shadow: 0 0 3px @secondary;
   opacity: 0.6;
 }
 
 /* --- Tooltip --- */
 tooltip {
   border: 20px solid transparent;
-  border-image-source: url("./assets/frames/tooltip.svg");
+  border-image-source: url("file:///home/neo/.config/theme/gen/waybar/frames/tooltip.svg");
   border-image-slice: 45 93 84 79 fill;
   background-color: @bg;
 }
@@ -63,7 +72,7 @@ tooltip label {
   padding: 5px;
   padding-left: 10px;
   color: @secondary;
-  text-shadow: 0 0 10px alpha(@secondary, 0.5);
+  text-shadow: 0 0 3px alpha(@secondary, 0.5);
 }
 
 /* --- 4. Specific Module Styling --- */
@@ -76,9 +85,9 @@ tooltip label {
 #custom-control {
   font-size: 20px;
   color: @secondary;
-  text-shadow: 0 0 5px @secondary;
+  text-shadow: 0 0 3px @secondary;
   padding: 0 10px;
-  background-image: url("./assets/panels/control.svg");
+  background-image: url("file:///home/neo/.config/theme/gen/waybar/panels/control.svg");
   background-size: 100% 85%;
   background-repeat: no-repeat;
   background-position: center;
@@ -86,17 +95,17 @@ tooltip label {
 
 #custom-control:hover {
   color: @accent;
-  text-shadow: 0 0 5px @accent;
+  text-shadow: 0 0 3px @accent;
 }
 
 /* --- Power Menu --- */
 #custom-powermenu {
   font-size: 20px;
   color: @accent;
-  text-shadow: 0 0 5px @accent;
+  text-shadow: 0 0 3px @accent;
   padding: 0 10px;
   margin-left: 2px;
-  background-image: url("./assets/panels/power.svg");
+  background-image: url("file:///home/neo/.config/theme/gen/waybar/panels/power.svg");
   background-size: 100% 85%;
   background-repeat: no-repeat;
   background-position: center;
@@ -104,37 +113,47 @@ tooltip label {
 
 #custom-powermenu:hover {
   color: @primary;
-  text-shadow: 0 0 5px @accent;
+  text-shadow: 0 0 3px @accent;
 }
 /* Custom Clock */
 #custom-clock {
-  color: @accent;
-  text-shadow: 0 0 5px @accent;
+  color: @primary;
+  text-shadow: 0 0 3px @primary_dim;
   padding: 0 5px;
 }
 
+/* The global * rule matches the inner label directly, so it must be targeted too */
+#custom-clock label {
+}
+
 /* Media Player */
+/* Short divider on the left edge separates it from the clock; it hides with the
+   module when nothing is playing */
 #custom-media {
   color: @secondary;
-  text-shadow: 0 0 5px @secondary;
-  margin: 0;
-  padding: 0;
+  text-shadow: 0 0 3px @secondary;
+  margin: 0 0 0 6px;
+  padding: 0 0 0 12px;
+  background-image: linear-gradient(@primary_dim, @primary_dim);
+  background-size: 2px 45%;
+  background-position: left center;
+  background-repeat: no-repeat;
 }
 
 /* --- Center Modules --- */
 
 #workspaces button {
   color: @primary;
-  text-shadow: 2px 2px 6px @primary;
+  text-shadow: 0 0 3px @primary;
   transition: all 0.3s ease-in-out;
-  padding: 0px 20px;
+  padding: 0px 13px;
+}
+#workspaces button.hover {
 }
 
 #workspaces button.active {
   color: @secondary;
-  text-shadow: 0 0 10px @secondary;
-  border-bottom: 2px solid @secondary;
-  border-radius: 2px;
+  text-shadow: 0 0 4px @secondary, 0 0 10px @secondary, 0 0 18px @tertiary;
 }
 
 /* --- Right Modules --- */
@@ -144,41 +163,52 @@ tooltip label {
   color: @primary;
   font-size: 1.8em;
   padding: 0px 8px;
-  text-shadow: 0 0 5px @primary;
+  text-shadow: 0 0 3px @primary;
 }
 
 #bluetooth,
-#network,
+#custom-network,
 #pulseaudio {
   font-size: 1.5em;
   margin: 0 5px;
   padding: 0 4px;
+  text-shadow: 0 0 1px @secondary;
 }
 
-#network.disconnected {
+#custom-network.disconnected {
   color: @primary;
   border-color: @primary;
-  text-shadow: 0 0 5px @primary;
-  box-shadow: 0 0 5px @primary;
+  text-shadow: 0 0 3px @primary;
 }
 
 #pulseaudio.muted {
   color: @primary;
   border-color: @primary;
-  text-shadow: 0 0 5px @primary;
-  box-shadow: 0 0 5px @primary;
+  text-shadow: 0 0 3px @primary;
+}
+
+/* Group dividers on the right: tray | network bluetooth audio | caffeine cpu memory battery.
+   Same short line as #custom-media, drawn on the left edge of each group's first module */
+#custom-network,
+#custom-caffeine {
+  margin-left: 6px;
+  padding-left: 14px;
+  background-image: linear-gradient(@primary_dim, @primary_dim);
+  background-size: 2px 45%;
+  background-position: left center;
+  background-repeat: no-repeat;
 }
 
 /* CPU */
 #cpu {
   color: @secondary;
-  text-shadow: 0 0 5px @tertiary;
+  /* text-shadow: 0 0 1px @secondary; */
   margin-left: 5px;
   margin-right: 1px;
   padding: 0 14px;
   margin-top: 0;
   margin-bottom: 0;
-  background-image: url("./assets/panels/cpu.svg");
+  background-image: url("file:///home/neo/.config/theme/gen/waybar/panels/cpu.svg");
   background-size: 100% 85%;
   background-repeat: no-repeat;
   background-position: center;
@@ -186,23 +216,23 @@ tooltip label {
 
 #cpu.warning {
   color: @accent;
-  text-shadow: 0 0 5px @accent;
+  text-shadow: 0 0 3px @accent;
 }
 
 #cpu.critical {
   color: @primary;
-  text-shadow: 0 0 5px @primary;
+  text-shadow: 0 0 3px @primary;
 }
 
 /* Memory */
 
 #memory {
   color: @secondary;
-  text-shadow: 0 0 5px @tertiary;
+  /* text-shadow: 0 0 3px @secondary; */
   margin-left: 2px;
   margin-right: 2px;
   padding: 0 8px;
-  background-image: url("./assets/panels/memory.svg");
+  background-image: url("file:///home/neo/.config/theme/gen/waybar/panels/memory.svg");
   background-size: 100% 85%;
   background-repeat: no-repeat;
   background-position: center;
@@ -210,10 +240,10 @@ tooltip label {
 
 #memory.warning {
   color: @accent;
-  text-shadow: 0 0 5px @accent;
+  text-shadow: 0 0 3px @accent;
 }
 
 #memory.critical {
   color: @primary;
-  text-shadow: 0 0 5px @primary;
+  text-shadow: 0 0 3px @primary;
 }

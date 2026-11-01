@@ -13,8 +13,8 @@
   "modules-center": ["hyprland/workspaces"],
   "modules-right": [
     "group/tray-expander",
+    "custom/network",
     "bluetooth",
-    "network",
     "pulseaudio",
     "custom/caffeine",
     "cpu",
@@ -24,15 +24,15 @@
   // Touch/mouse control menu (for Moonlight streaming): left = menu, right = app launcher
   "custom/control": {
     "format": "󰍜",
-    "on-click": "/home/neo/.config/wofi/control-menu.sh",
-    "on-click-right": "/home/neo/.config/wofi/control-menu.sh apps",
-    "on-click-middle": "/home/neo/.config/wofi/control-menu.sh windows",
+    "on-click": "/home/neo/.config/wofi/control-menu/control-menu.sh",
+    "on-click-right": "/home/neo/.config/wofi/control-menu/control-menu.sh apps",
+    "on-click-middle": "/home/neo/.config/wofi/control-menu/control-menu.sh windows",
     "tooltip-format": "Control menu · right-click: apps · middle-click: windows",
     "tooltip": true
   },
   "custom/powermenu": {
     "format": "⏻",
-    "on-click": "/home/neo/.config/wofi/power-menu.sh",
+    "on-click": "/home/neo/.config/wofi/control-menu/power-menu.sh",
     "tooltip": false
   },
   "custom/clock": {
@@ -69,24 +69,23 @@
     "tooltip": false,
     "format-icons": {
       "default": "",
-      "1": "<span font_desc='Noto Sans Japanese Bold 14'>一</span>",
-      "2": "<span font_desc='Noto Sans Japanese Bold 14'>二</span>",
-      "3": "<span font_desc='Noto Sans Japanese Bold 14'>三</span>",
-      "4": "<span font_desc='Noto Sans Japanese Bold 14'>四</span>",
-      "5": "<span font_desc='Noto Sans Japanese Bold 14'>五</span>",
-      "6": "<span font_desc='Noto Sans Japanese Bold 14'>六</span>",
-      "7": "<span font_desc='Noto Sans Japanese Bold 14'>七</span>",
-      "8": "<span font_desc='Noto Sans Japanese Bold 14'>八</span>",
-      "9": "<span font_desc='Noto Sans Japanese Bold 14'>九</span>",
-      "10": "<span font_desc='Noto Sans Japanese Bold 14'>十</span>",
-      "active": "<span font_desc='Noto Sans Japanese Bold 14'></span>"
+      "1": "<span font_desc='Noto Sans JP Bold 14'>一</span>",
+      "2": "<span font_desc='Noto Sans JP Bold 14'>二</span>",
+      "3": "<span font_desc='Noto Sans JP Bold 14'>三</span>",
+      "4": "<span font_desc='Noto Sans JP Bold 14'>四</span>",
+      "5": "<span font_desc='Noto Sans JP Bold 14'>五</span>",
+      "6": "<span font_desc='Noto Sans JP Bold 14'>六</span>",
+      "7": "<span font_desc='Noto Sans JP Bold 14'>七</span>",
+      "8": "<span font_desc='Noto Sans JP Bold 14'>八</span>",
+      "9": "<span font_desc='Noto Sans JP Bold 14'>九</span>",
+      "10": "<span font_desc='Noto Sans JP Bold 14'>十</span>"
     },
     "persistent-workspaces": {
       "1": [],
       "2": [],
       "3": [],
       "4": [],
-      "5": []
+      "5": [],
     }
   },
   "group/tray-expander": {
@@ -108,7 +107,7 @@
   "bluetooth": {
     "format": "",
     "format-disabled": "󰂲",
-    "format-connected": "<span font_desc='Rajdhani Bold 12'>󰂱  {device_battery_percentage}%</span>",
+    "format-connected": "<span font_desc='Rajdhani SemiBold 12'>󰂰  {device_battery_percentage}%</span>",
     "format-no-controller": "",
     "tooltip-format-connected": "{controller_alias}\n{controller_address}\nConnected: {num_connections}\n\n{device_enumerate}",
     "tooltip-format-enumerate-connected": "{device_alias} ({device_battery_percentage}%)",
@@ -116,19 +115,12 @@
     "tooltip-format-enumerate-disconnected": "{device_alias}\t{device_address}",
     "on-click": "pkill -f '^bluetui$' || exec uwsm app -- xdg-terminal-exec --title=floating-tui bluetui"
   },
-  "network": {
-    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
-    "format": "{icon}",
-    "format-wifi": "{icon}",
-    "format-ethernet": "󰀂",
-    "format-disconnected": "󰤮",
-    "tooltip-format-wifi": "{ifname}\n{essid}\nIP: {ipaddr}/{cidr}\n{frequency} MHz | {signalStrength}%\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
-    "tooltip-format-ethernet": "{ifname}\nIP: {ipaddr}/{cidr}\n⇣{bandwidthDownBytes}  ⇡{bandwidthUpBytes}",
-    "tooltip-format-disconnected": "Disconnected",
+  "custom/network": {
+    "exec": "~/.config/waybar/scripts/network-status.sh",
+    "return-type": "json",
     "interval": 3,
-    "spacing": 1,
-    "on-click": "pkill -f '^nmtui$' || exec uwsm app -- xdg-terminal-exec --title=floating-tui nmtui",
-    "on-click-right": "pkill -f '^impala$' || exec uwsm app -- xdg-terminal-exec --title=floating-tui impala"
+    "tooltip": true,
+    "on-click": "pkill -f '^nmtui$' || exec uwsm app -- xdg-terminal-exec --title=floating-tui nmtui"
   },
   "pulseaudio": {
     "format": "{icon}",
@@ -143,7 +135,7 @@
   },
   "cpu": {
     "interval": 5,
-    "format": "<span font_desc='JetBrains Mono Bold 16' >󰍛</span>",
+    "format": "<span font_desc='JetBrainsMono Nerd Font Mono Bold 16' >󰍛</span>",
     "tooltip-format": "{usage}%",
     "on-click": "pkill -f '^btop -p 2' || exec uwsm app -- xdg-terminal-exec --title=floating-tui btop -p 2",
     "states": {

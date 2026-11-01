@@ -84,4 +84,15 @@ hl.window_rule({
 	opaque = true,
 })
 
-hl.window_rule({})
+hl.workspace_rule({
+	workspace = 6,
+	layout = "master",
+})
+
+hl.window_rule({
+	name = "EagleEye cameras",
+	match = {
+		title = "^EagelEye.*",
+	},
+	workspace = "6 silent",
+})
