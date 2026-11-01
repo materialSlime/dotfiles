@@ -38,8 +38,8 @@ window {
     background-color: transparent;
 }
 
-/* 9-slice frame: ~/.config/wofi/shared/assets/menu.svg, recolored by ~/.config/theme/build.
-   Drawn at half size; the top-right corner is bigger (88x56 -> 44x28px) to fit the hatch,
+/* 9-slice frame: ~/.config/wofi/shared/assets/menu.svg ("stepped lip"), recolored by ~/.config/theme/build.
+   Drawn at half size; the left slice is bigger (88 -> 44px) to fit the step and trace,
    and extends past the 20px border into the padding. Background is clipped to inside the frame
    so the cut corners stay see-through. */
 #outer-box {
@@ -47,8 +47,8 @@ window {
     padding: 5px;
     border: 20px solid transparent;
     border-image-source: url("file:///home/neo/.config/theme/gen/wofi/menu.svg");
-    border-image-slice: 56 88 40 40; /* no "fill": GTK rejects it and drops the whole property */
-    border-image-width: 28px 44px 20px 20px;
+    border-image-slice: 40 40 40 88; /* no "fill": GTK rejects it and drops the whole property */
+    border-image-width: 20px 20px 20px 44px;
     border-image-repeat: stretch;
     background-color: @bg;
     background-clip: padding-box;

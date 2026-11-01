@@ -311,6 +311,7 @@ SVG_COLORS = {
     "#000000": None,                # tooltip shadow: keep
     "#1A1B2E": "surface",           # wofi field/highlight fill
     "#F3E900": "accent",            # wofi highlight
+    "#5EF6FF": "secondary",         # wofi/swaync frame trace
 }
 SVG_COLOR_RE = re.compile(r"((?:fill|stroke|stop-color)\s*(?::|=\s*\")\s*)(#[0-9A-Fa-f]{6})")
 

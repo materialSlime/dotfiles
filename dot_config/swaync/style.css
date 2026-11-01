@@ -130,12 +130,14 @@ notificationwindow, blankwindow, .blank-window {
   padding: 6px 10px;
 }
 
-/* the card: 9-slice frame, 10px edges drawn 1:1 */
+/* the card: 9-slice "tab" frame drawn 1:1; the left image edge (44px) is wider than the
+   border so the tab fits without pushing the text in */
 .notification-row .notification-background .notification {
   border: 10px solid transparent;
+  border-width: 12px 10px 10px 10px;
   border-image-source: var(--frame-card);
-  border-image-slice: 10;
-  border-image-width: 10px;
+  border-image-slice: 12 10 10 44;
+  border-image-width: 12px 10px 10px 44px;
   border-image-repeat: stretch;
   border-radius: 0px;
   background: @bg;
@@ -147,7 +149,7 @@ notificationwindow, blankwindow, .blank-window {
 
 .notification-row .notification-background .notification.critical {
   border-image-source: var(--frame-card-critical);
-  box-shadow: 0 0 14px alpha(@primary, 0.25);
+  box-shadow: 0 0 14px alpha(@accent, 0.25);
 }
 
 .notification-row .notification-background .notification.low {
@@ -201,7 +203,7 @@ notificationwindow, blankwindow, .blank-window {
   text-shadow: 0 0 6px alpha(@primary, 0.35);
 }
 
-/* critical = needs attention -> yellow title on the red card */
+/* critical = needs attention -> yellow title on a yellow-outlined card */
 .notification.critical .notification-content .text-box .summary {
   color: @accent;
   text-shadow: 0 0 8px alpha(@accent, 0.4);
@@ -345,14 +347,14 @@ notificationwindow, blankwindow, .blank-window {
 
 /* ============================================================
    CONTROL CENTER (the panel)
-   Same frame as the wofi menus; 20px edges, top-right corner bigger for the hatch
+   Same frame as the wofi menus; 20px edges, left side bigger for the step
    ============================================================ */
 
 .control-center {
   border: 20px solid transparent;
   border-image-source: var(--frame-panel);
-  border-image-slice: 56 88 40 40;
-  border-image-width: 28px 44px 20px 20px;
+  border-image-slice: 40 40 40 88;
+  border-image-width: 20px 20px 20px 44px;
   border-image-repeat: stretch;
   border-radius: 0px;
   background: alpha(@bg, 0.94);

@@ -1,13 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="120" height="60" viewBox="0 0 120 60">
-  <!-- 9-slice critical notification card for swaync (border-image-slice: 10, drawn 1:1).
-       Same as card.svg with a full-strength outline, a solid bar down the left and two
-       hatch stripes top-right. Recolored by ~/.config/theme/build (SVG_COLORS). -->
-  <path d="M 8.5,0.5 H 119.5 V 51.5 L 111.5,59.5 H 0.5 V 8.5 Z"
-        style="fill:#0e0f18;stroke:#c7373e;stroke-width:1"/>
-  <!-- solid bar down the left, following the cut corner -->
-  <path d="M 0,60 V 8 L 8,0 H 10 V 2 H 8.8 L 4,6.8 V 60 Z" style="fill:#c7373e"/>
-  <!-- hatch stripes, top-right -->
-  <path d="M 113,2 H 115 L 113,7 H 111 Z" style="fill:#c7373e"/>
-  <path d="M 117,2 H 119 L 117,7 H 115 Z" style="fill:#c7373e"/>
-  <path d="M 120,50 V 52 L 112,60 H 110 Z" style="fill:#c7373e"/>
+  <!-- Critical version of card.svg: full-strength yellow outline, red tab. Same slices.
+       Recolored by ~/.config/theme/build (SVG_COLORS). -->
+  <path d="M 0.5,6.5 H 119.5 V 59.5 H 0.5 Z" style="fill:#0e0f18;stroke:#f3e900;stroke-width:1"/>
+  <path d="M 0,0 H 34 L 40,6 H 0 Z" style="fill:#c7373e"/>
 </svg>
